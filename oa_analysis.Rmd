@@ -41,6 +41,9 @@ articles_all = articles_raw
 articles_all = articles_all %>%
   mutate(is_open_license=(grepl("cc", license) | oa_color=="gold"))
 
+# there is an artifact in the data caused by this "publisher." remove.
+articles_all = articles_all %>% filter(publisher != "CrossRef Test Account")
+
 articles_all$oa = "closed"
 articles_all$oa[articles_all$oa_color=="green"] = "green_only"
 articles_all$oa[articles_all$oa_color=="gold"] = "gold_doaj"
@@ -68,7 +71,7 @@ oa_color_map = scale_fill_manual(values=c("#777777", "#2196F3", "#4CAF50", "#FFC
 
 
 
-How much OA is there?
+# How much OA is there?
 ====================
 
 
@@ -81,7 +84,10 @@ articles_all %>% ggplot(aes(x="", fill=oa)) + geom_bar() + oa_color_map
 So, about 23% of the DOI-assigned literature is available to read. But we know that in recent years OA has been gaining steam, so let's let's look more closely at OA over time.
 
 
-How is open access changing over time?
+
+
+
+# How is open access changing over time?
 ===================
 
 How complete is the publication year data from Crossref?
@@ -131,6 +137,8 @@ oa_freq_by_year = articles_all %>% filter(is_modern) %>% count(year, oa) %>%
 oa_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=oa)) + geom_area() + oa_color_map
 ```
 
+
+The proportion of OA is 
 
 
 # publishers
