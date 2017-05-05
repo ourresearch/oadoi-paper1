@@ -4,35 +4,6 @@ many
 
 *It's very much a work in progress; feel free to submit pull requests with updates and changes.*
 
-    ## 
-    ## Attaching package: 'dplyr'
-
-    ## The following objects are masked from 'package:stats':
-    ## 
-    ##     filter, lag
-
-    ## The following objects are masked from 'package:base':
-    ## 
-    ##     intersect, setdiff, setequal, union
-
-    ## 
-    ## Attaching package: 'reshape'
-
-    ## The following object is masked from 'package:dplyr':
-    ## 
-    ##     rename
-
-    ## 
-    ## Attaching package: 'tidyr'
-
-    ## The following objects are masked from 'package:reshape':
-    ## 
-    ##     expand, smiths
-
-    ## The following object is masked from 'package:magrittr':
-    ## 
-    ##     extract
-
 ``` r
 2+2
 ```

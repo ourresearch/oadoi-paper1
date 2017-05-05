@@ -6,7 +6,7 @@ output: github_document
 
 *It's very much a work in progress; feel free to submit pull requests with updates and changes.*
 
-```{r setup, echo=FALSE, warning=FALSE}
+```{r setup, echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
 library(knitr)
 opts_knit$set(progress=TRUE, tidy=TRUE, echo=TRUE)
 # devtools::install_github("cboettig/knitcitations@v1")
