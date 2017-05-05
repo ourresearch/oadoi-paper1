@@ -27,7 +27,7 @@ library(tidyr)
 ```
 
 ```{r}
-2+2
+2+3
 ```
 
 ```{r get_data, echo=FALSE, cache=TRUE, results='hide'}
