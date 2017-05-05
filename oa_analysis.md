@@ -4,6 +4,41 @@ many
 
 *It's very much a work in progress; feel free to submit pull requests with updates and changes.*
 
+    ## 
+    ## Attaching package: 'dplyr'
+
+    ## The following objects are masked from 'package:stats':
+    ## 
+    ##     filter, lag
+
+    ## The following objects are masked from 'package:base':
+    ## 
+    ##     intersect, setdiff, setequal, union
+
+    ## 
+    ## Attaching package: 'reshape'
+
+    ## The following object is masked from 'package:dplyr':
+    ## 
+    ##     rename
+
+    ## 
+    ## Attaching package: 'tidyr'
+
+    ## The following objects are masked from 'package:reshape':
+    ## 
+    ##     expand, smiths
+
+    ## The following object is masked from 'package:magrittr':
+    ## 
+    ##     extract
+
+``` r
+2+2
+```
+
+    ## [1] 4
+
 set up time frames
 
 ``` r
@@ -69,7 +104,7 @@ overall oa picture
 ggplot(articles_all, aes(x="", fill=oa)) + geom_bar() + oa_color_map
 ```
 
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-4-1.png)
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-5-1.png)
 
 growth in literature over time with gold/green showing. but this does not have percent
 
@@ -77,7 +112,7 @@ growth in literature over time with gold/green showing. but this does not have p
 ggplot(articles_timeseries, aes(x=year, fill=oa)) + geom_bar(width=1) + oa_color_map
 ```
 
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-5-1.png)
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-6-1.png)
 
 position=fill makes it show percent. but ugly we could chop it at 1990
 
@@ -85,7 +120,7 @@ position=fill makes it show percent. but ugly we could chop it at 1990
 ggplot(articles_timeseries, aes(x=year, fill=oa)) + geom_bar(width=1, position="fill") + oa_color_map
 ```
 
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-6-1.png)
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-7-1.png)
 
 another way to show percent from <http://stackoverflow.com/questions/24576515/relative-frequencies-proportions-with-dplyr>
 
@@ -97,7 +132,7 @@ oa_freq_by_year = articles_timeseries %>% count(year, oa) %>%  # count articles 
 oa_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=oa)) + geom_area() + oa_color_map
 ```
 
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-7-1.png)
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-8-1.png)
 
 publishers
 ==========
@@ -127,7 +162,7 @@ sum(publishers$n[0:100]) /sum(publishers$n)
 publishers %>% slice(1:25) %>% ggplot(aes(x=publisher, y=n)) + geom_bar(stat="identity") + coord_flip()
 ```
 
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-9-1.png)
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-10-1.png)
 
 ``` r
 publishers_oa = articles_recent %>% 
@@ -141,7 +176,7 @@ publishers_oa %>% slice(1:80) %>% ggplot(aes(x=publisher, y=n, fill=oa)) +
   oa_color_map
 ```
 
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-10-1.png)
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-11-1.png)
 
 same thing but by % oa
 
@@ -152,7 +187,7 @@ publishers_oa %>% slice(1:80) %>% ggplot(aes(x=publisher, y=n, fill=oa)) +
   oa_color_map
 ```
 
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-11-1.png)
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-12-1.png)
 
 ``` r
 articles_all$journal = fct_infreq(articles_all$journal)
@@ -179,7 +214,7 @@ journals_oa %>% slice(1:275) %>% ggplot(aes(x=journal, y=n, fill=oa)) +
   oa_color_map
 ```
 
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-12-1.png)
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-13-1.png)
 
 same thing but by % oa
 
@@ -192,7 +227,7 @@ journals_oa %>% slice(0:76) %>% ggplot(aes(x=journal, y=n, fill=oa)) +
 
     ## Warning: Removed 1 rows containing missing values (position_stack).
 
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-13-1.png)
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-14-1.png)
 
 *subjects*
 

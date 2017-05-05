@@ -1,24 +1,19 @@
 ---
 title: "OA paper"
 author: "many"
-output: html_notebook
+output: github_document
 ---
 
 *It's very much a work in progress; feel free to submit pull requests with updates and changes.*
 
-```{r setup, echo=FALSE}
+```{r setup, echo=FALSE, warning=FALSE}
 library(knitr)
 opts_knit$set(progress=TRUE, tidy=TRUE, echo=TRUE)
-```
+# devtools::install_github("cboettig/knitcitations@v1")
+library(knitcitations); cleanbib()
+cite_options(citation_format = "pandoc", check.entries=FALSE)
 
-```{r knitcitations, echo=FALSE}
-  # devtools::install_github("cboettig/knitcitations@v1")
-  library(knitcitations); cleanbib()
-  cite_options(citation_format = "pandoc", check.entries=FALSE)
-  library(bibtex)
-```
-
-```{r load_libraries, echo=FALSE, message=FALSE, warning=FALSE, results='hide'}
+library(bibtex)
 library(magrittr)
 library(ggplot2)
 library(dplyr)
@@ -31,16 +26,15 @@ library(jsonlite)
 library(tidyr)
 ```
 
-
-
-
-
+```{r}
+2+2
+```
 
 ```{r get_data, echo=FALSE, cache=TRUE, results='hide'}
 # setwd("~/Dropbox/ti/oadoi-paper")
 
 #### uncomment this on first run of the day
-# articles_raw <- read.csv("export_study_hybrid_20170504.csv")
+articles_raw <- read.csv("export_study_hybrid_20170504.csv")
 articles_all = articles_raw
 
 # modify the colors to handle hybrid
@@ -68,7 +62,7 @@ articles_all %>% count(oa)
 oa_color_map = scale_fill_manual(values=c("#777777", "#2196F3", "#4CAF50", "#FFC107", "#FFEB3B"))
 
 
-articles_recent  %>% filter(journal=="Nature", oa_color=="blue") %>% select(oa, oa_color,evidence, license, year)
+# articles_recent  %>% filter(journal=="Nature", oa_color=="blue") %>% select(oa, oa_color,evidence, license, year)
 
 
 ```
