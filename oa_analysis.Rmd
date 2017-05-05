@@ -1,0 +1,246 @@
+---
+title: "OA paper"
+author: "many"
+output: html_notebook
+---
+
+*It's very much a work in progress; feel free to submit pull requests with updates and changes.*
+
+```{r setup, echo=FALSE}
+library(knitr)
+opts_knit$set(progress=TRUE, tidy=TRUE, echo=TRUE)
+```
+
+```{r knitcitations, echo=FALSE}
+  # devtools::install_github("cboettig/knitcitations@v1")
+  library(knitcitations); cleanbib()
+  cite_options(citation_format = "pandoc", check.entries=FALSE)
+  library(bibtex)
+```
+
+```{r load_libraries, echo=FALSE, message=FALSE, warning=FALSE, results='hide'}
+library(magrittr)
+library(ggplot2)
+library(dplyr)
+library(broom)
+library(reshape)
+library(scales)
+library(corrplot)
+library(forcats)
+library(jsonlite)
+library(tidyr)
+```
+
+
+
+
+
+
+```{r get_data, echo=FALSE, cache=TRUE, results='hide'}
+# setwd("~/Dropbox/ti/oadoi-paper")
+
+#### uncomment this on first run of the day
+# articles_raw <- read.csv("export_study_hybrid_20170504.csv")
+articles_all = articles_raw
+
+# modify the colors to handle hybrid
+articles_all = articles_all %>%
+  mutate(is_open_license=(grepl("cc", license) | oa_color=="gold"))
+
+articles_all$oa = "closed"
+articles_all$oa[articles_all$oa_color=="green"] = "green_only"
+articles_all$oa[articles_all$oa_color=="gold"] = "gold_doaj"
+articles_all$oa[articles_all$oa_color=="blue" & articles_all$is_open_license] = "gold_not_doaj"
+articles_all$oa[articles_all$oa_color=="blue" & !articles_all$is_open_license] = "free"
+
+
+
+# sort the factor for easier plotting
+articles_all = mutate(articles_all, oa=fct_infreq(oa))
+
+# how does it look
+articles_all %>% select(oa_color, oa, is_open_license)
+articles_all %>% count(oa)
+
+
+
+# handy for color-coding later
+oa_color_map = scale_fill_manual(values=c("#777777", "#2196F3", "#4CAF50", "#FFC107", "#FFEB3B"))
+
+
+articles_recent  %>% filter(journal=="Nature", oa_color=="blue") %>% select(oa, oa_color,evidence, license, year)
+
+
+```
+
+
+
+
+
+set up time frames
+```{r} 
+
+
+articles_timeseries = filter(articles_all, year >= 1990, year < 2016)  # just use last 50yrs
+articles_recent = filter(articles_all, year >= 2009, year < 2016)
+
+nrow(articles_all)
+nrow(articles_timeseries)
+nrow(articles_recent)
+```
+
+column names:
+```{r}
+colnames(articles_all)
+```
+
+
+
+```{r}
+
+articles_all %>% select(evidence) %>% group_by(evidence) %>% tally()
+```
+
+
+
+
+
+
+
+overall oa picture
+```{r}
+ggplot(articles_all, aes(x="", fill=oa)) + geom_bar() + oa_color_map
+```
+
+
+
+growth in literature over time with gold/green showing. 
+but this does not have percent
+```{r}
+ggplot(articles_timeseries, aes(x=year, fill=oa)) + geom_bar(width=1) + oa_color_map
+```
+
+position=fill makes it show percent. but ugly
+we could chop it at 1990
+```{r}
+ggplot(articles_timeseries, aes(x=year, fill=oa)) + geom_bar(width=1, position="fill") + oa_color_map
+```
+
+another way to show percent
+from http://stackoverflow.com/questions/24576515/relative-frequencies-proportions-with-dplyr
+```{r}
+oa_freq_by_year = articles_timeseries %>% count(year, oa) %>%  # count articles in each year and color
+  mutate(perc = n / sum(n)) %>%  # add col for percent *within that year* cos we are still in Group Mode
+  ungroup()  # get out of that Group Mode.
+
+oa_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=oa)) + geom_area() + oa_color_map
+```
+
+
+
+# publishers
+# ========================
+
+# sort the publisher factor by frequency...helps in plotting.
+```{r}
+
+articles_recent$publisher = fct_infreq(articles_recent$publisher)
+
+publishers = articles_recent %>% 
+  count(publisher, oa) %>%
+  arrange(desc(n)) %>%
+  ungroup()
+
+# the top 25 publishers publish 80% of articles.
+# top 100 publshers publish 87% of articles.
+sum(publishers$n[0:100]) /sum(publishers$n)
+```
+
+```{r}
+publishers %>% slice(1:25) %>% ggplot(aes(x=publisher, y=n)) + geom_bar(stat="identity") + coord_flip()
+```
+
+```{r}
+publishers_oa = articles_recent %>% 
+  count(publisher, oa) %>%
+  ungroup()
+
+
+publishers_oa %>% slice(1:80) %>% ggplot(aes(x=publisher, y=n, fill=oa)) + 
+  geom_bar(stat="identity") + 
+  coord_flip() +
+  oa_color_map
+```
+
+same thing but by % oa
+```{r}
+publishers_oa %>% slice(1:80) %>% ggplot(aes(x=publisher, y=n, fill=oa)) + 
+  geom_bar(stat="identity", position="fill") + 
+  coord_flip() +
+  oa_color_map
+
+```
+
+
+
+
+
+```{r}
+
+articles_all$journal = fct_infreq(articles_all$journal)
+
+journals = articles_all %>% 
+  count(journal, oa) %>%
+  arrange(desc(n)) %>%
+  ungroup()
+
+sum(journals$n[0:100]) /sum(journals$n)
+
+journals_oa = articles_all %>% 
+  count(journal, oa) %>%
+  ungroup()
+
+
+journals_oa %>% slice(1:275) %>% ggplot(aes(x=journal, y=n, fill=oa)) + 
+  geom_bar(stat="identity") + 
+  coord_flip() +
+  oa_color_map
+```
+
+same thing but by % oa
+```{r}
+journals_oa %>% slice(0:76) %>% ggplot(aes(x=journal, y=n, fill=oa)) + 
+  geom_bar(stat="identity", position="fill") + 
+  coord_flip() +
+  oa_color_map
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+_subjects_
+
+unpack subjects into a list
+```{r}
+# articles %>% 
+# select(subject, oa) %>%
+# filter(as.character(subject) != "") %>%
+# rowwise()  %>%
+# mutate( subj_list = list( fromJSON( as.character( subject ) ) ) )
+
+
+# articles$subject[0:10]
+```
+
+
+
