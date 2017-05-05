@@ -34,4 +34,8 @@ vignettes/*.pdf
 
 # data
 *.csv
+
+# notebook web pages (for now, because github can't render them)
+*.nb.html
+
 .Rproj.user
