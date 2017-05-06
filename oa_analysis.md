@@ -2,13 +2,11 @@ OA paper
 ================
 many
 
-*It's very much a work in progress; feel free to submit pull requests with updates and changes.*
+*very much a work in progress*
 
-``` r
-2+3
-```
+Results outline - How accurate is our OA detection (from Juan, modified to use hybrid analysis) - How much OA is there? - How is open access changing over time? - How do OA patterns vary across publishers? - Which repositories contribute most to OA availability? - How do OA patterns vary by discipline? - How much OA is there in most highly-accessed papers? - Do different types of OA have different citation patterns?
 
-    ## [1] 5
+Discussion - limitations - some free-to-read where we don't get it (ResearchGate, personal web pages) - articles without DOIs - future work - more citation, altmetrics studies - expounding on what this means for the future of OA
 
 \# How much OA is there?
 ========================
@@ -30,7 +28,7 @@ articles_all %>% count(oa) %>% mutate(proportion=n/sum(n))
 articles_all %>% ggplot(aes(x="", fill=oa)) + geom_bar() + oa_color_map
 ```
 
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-2-1.png) \* insert definitions of our colors here \*
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-1-1.png) \* insert definitions of our colors here \*
 
 So, about 23% of the DOI-assigned literature is available to read. But we know that in recent years OA has been gaining steam, so let's let's look more closely at OA over time.
 
@@ -59,7 +57,7 @@ articles_all %>% filter(is_modern) %>%
     ggplot(aes(x=year)) + geom_bar(width=1) 
 ```
 
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-4-1.png)
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-3-1.png)
 
 Unsurprisingly, we do not yet have enough data from 2017 to plot. More surprisingly, 2016 seems to be missing some data as well. Publishers can be slow to deposit information with Crossref, and this is likely the cause. So, we'll remove 2017 and 2016 from our timeseries subset.
 
@@ -84,7 +82,7 @@ articles_all %>% filter(is_modern) %>%
     ggplot(aes(x=year, fill=oa)) + geom_bar(width=1) + oa_color_map
 ```
 
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-6-1.png)
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-5-1.png)
 
 We can see the absolute number of free-to-read articles of all kinds is growing significantly. However, we're particularly interested in the by-year *proportion* of the literature that is free to read.
 
@@ -97,7 +95,7 @@ oa_freq_by_year = articles_all %>% filter(is_modern) %>% count(year, oa) %>%
 oa_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=oa)) + geom_area() + oa_color_map
 ```
 
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-7-1.png)
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-6-1.png)
 
 The proportion of OA is growing, too--not just the absolute amounts.
 
@@ -130,8 +128,91 @@ sum(publishers$n[0:20]) /sum(publishers$n)
 publishers %>% slice(1:25) %>% ggplot(aes(x=publisher, y=n)) + geom_bar(stat="identity") + coord_flip()
 ```
 
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-9-1.png)
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-8-1.png)
 
 Looking at top twenty publishers, we get about half of articles. Looks like there is a very long tail of smaller publishers.
 
 coming soon: oa by publisher.
+
+\# Which repositories contribute most to OA availability?
+---------------------------------------------------------
+
+Growth in literature over time with any green
+---------------------------------------------
+
+``` r
+gray_green_color_map = scale_fill_manual(values=c("#777777", "#008000", "#FFD700"))
+
+articles_all %>% filter(is_modern) %>% ggplot(aes(x=year, fill=found_green)) + geom_bar(width=1) + gray_green_color_map
+```
+
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-9-1.png) \#\# Proportion of all articles that have been deposited in a repository
+
+``` r
+found_green_freq_by_year = articles_all %>% filter(is_modern) %>% count(year, found_green) %>% 
+  mutate(perc = n / sum(n)) %>% 
+  ungroup()  
+found_green_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=found_green)) + geom_area() + gray_green_color_map
+```
+
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-10-1.png)
+
+Proportion of all articles that can only be accessed through a repository
+-------------------------------------------------------------------------
+
+``` r
+only_green_freq_by_year = articles_all %>% filter(is_modern) %>% mutate(is_green=oa=="green_only") %>% count(year, is_green) %>% mutate(perc = n / sum(n)) %>% ungroup()  
+
+only_green_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=is_green)) + geom_area() + gray_green_color_map
+```
+
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-11-1.png)
+
+``` r
+articles_all %>% filter(is_modern) %>% ggplot(aes(x=year, fill=evidence)) + geom_bar(width=1)
+```
+
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-12-1.png)
+
+``` r
+articles_all %>% filter(is_modern) %>% mutate(is_green=oa=="green_only")  %>% filter(is_green) %>% filter(grepl('pmcid', evidence)) %>% ggplot(aes(x=year, fill=is_green)) + geom_bar(width=1)
+```
+
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-12-2.png)
+
+``` r
+# citeseerx
+articles_all %>% filter(is_modern) %>% mutate(is_green=oa=="green_only")  %>% filter(is_green) %>% mutate(base_collection_string=as.character(green_base_collections)) %>% filter(grepl('citeseerx', base_collection_string)) %>% ggplot(aes(x=year, fill=is_green)) + geom_bar(width=1)
+```
+
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-12-3.png)
+
+``` r
+# arxiv
+articles_all %>% filter(is_modern) %>% mutate(is_green=oa=="green_only")  %>% filter(is_green) %>% mutate(base_collection_string=as.character(green_base_collections)) %>% filter(grepl('arxiv', base_collection_string)) %>% ggplot(aes(x=year, fill=is_green)) + geom_bar(width=1)
+```
+
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-12-4.png)
+
+``` r
+# pubmed
+articles_all %>% filter(is_modern) %>% mutate(is_green=oa=="green_only")  %>% filter(is_green) %>% mutate(base_collection_string=as.character(green_base_collections)) %>% filter(grepl('pubmed', base_collection_string)) %>% ggplot(aes(x=year, fill=is_green)) + geom_bar(width=1)
+```
+
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-12-5.png)
+
+``` r
+# not citeseerx or arxiv or pubmed
+articles_all %>% filter(is_modern) %>% mutate(is_green=oa=="green_only")  %>% filter(is_green) %>% mutate(base_collection_string=as.character(green_base_collections)) %>% filter(!grepl('citeseerx', base_collection_string), !grepl('arxiv', base_collection_string), !grepl('pubmed', base_collection_string), !grepl('pmcid', evidence)) %>% ggplot(aes(x=year, fill=is_green)) + geom_bar(width=1)
+```
+
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-12-6.png)
+
+\# By license
+-------------
+
+``` r
+articles_all %>% filter(is_modern) %>% filter(grepl('cc', license)) %>% ggplot(aes(x=year, fill=license)) + geom_bar(width=1, position="fill") 
+```
+
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-13-1.png)

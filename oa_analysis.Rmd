@@ -4,7 +4,7 @@ author: "many"
 output: github_document
 ---
 
-*It's very much a work in progress; feel free to submit pull requests with updates and changes.*
+*very much a work in progress*
 
 ```{r setup, echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
 library(knitr)
@@ -26,9 +26,27 @@ library(jsonlite)
 library(tidyr)
 ```
 
-```{r}
-2+3
-```
+
+Results outline
+- How accurate is our OA detection
+    (from Juan, modified to use hybrid analysis)
+- How much OA is there?
+- How is open access changing over time?
+- How do OA patterns vary across publishers?
+- Which repositories contribute most to OA availability?
+- How do OA patterns vary by discipline?
+- How much OA is there in most highly-accessed papers?
+- Do different types of OA have different citation patterns?
+
+Discussion
+- limitations
+    - some free-to-read where we don't get it (ResearchGate, personal web pages)
+    - articles without DOIs
+- future work
+    - more citation, altmetrics studies
+- expounding on what this means for the future of OA
+
+
 
 ```{r get_data, echo=FALSE, cache=TRUE, results='hide'}
 # setwd("~/Dropbox/ti/oadoi-paper")
@@ -172,4 +190,60 @@ Looking at top twenty publishers, we get about half of articles. Looks like ther
 
 coming soon: oa by publisher.
 
+
+# Which repositories contribute most to OA availability?
+------------
+
+
+## Growth in literature over time with any green
+```{r}
+gray_green_color_map = scale_fill_manual(values=c("#777777", "#008000", "#FFD700"))
+
+articles_all %>% filter(is_modern) %>% ggplot(aes(x=year, fill=found_green)) + geom_bar(width=1) + gray_green_color_map
+```
+## Proportion of all articles that have been deposited in a repository
+
+```{r}
+found_green_freq_by_year = articles_all %>% filter(is_modern) %>% count(year, found_green) %>% 
+  mutate(perc = n / sum(n)) %>% 
+  ungroup()  
+found_green_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=found_green)) + geom_area() + gray_green_color_map
+```
+
+## Proportion of all articles that can only be accessed through a repository
+
+```{r}
+only_green_freq_by_year = articles_all %>% filter(is_modern) %>% mutate(is_green=oa=="green_only") %>% count(year, is_green) %>% mutate(perc = n / sum(n)) %>% ungroup()  
+
+only_green_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=is_green)) + geom_area() + gray_green_color_map
+```
+
+```{r}
+articles_all %>% filter(is_modern) %>% ggplot(aes(x=year, fill=evidence)) + geom_bar(width=1)
+
+articles_all %>% filter(is_modern) %>% mutate(is_green=oa=="green_only")  %>% filter(is_green) %>% filter(grepl('pmcid', evidence)) %>% ggplot(aes(x=year, fill=is_green)) + geom_bar(width=1)
+
+# citeseerx
+articles_all %>% filter(is_modern) %>% mutate(is_green=oa=="green_only")  %>% filter(is_green) %>% mutate(base_collection_string=as.character(green_base_collections)) %>% filter(grepl('citeseerx', base_collection_string)) %>% ggplot(aes(x=year, fill=is_green)) + geom_bar(width=1)
+
+# arxiv
+articles_all %>% filter(is_modern) %>% mutate(is_green=oa=="green_only")  %>% filter(is_green) %>% mutate(base_collection_string=as.character(green_base_collections)) %>% filter(grepl('arxiv', base_collection_string)) %>% ggplot(aes(x=year, fill=is_green)) + geom_bar(width=1)
+
+# pubmed
+articles_all %>% filter(is_modern) %>% mutate(is_green=oa=="green_only")  %>% filter(is_green) %>% mutate(base_collection_string=as.character(green_base_collections)) %>% filter(grepl('pubmed', base_collection_string)) %>% ggplot(aes(x=year, fill=is_green)) + geom_bar(width=1)
+
+# not citeseerx or arxiv or pubmed
+articles_all %>% filter(is_modern) %>% mutate(is_green=oa=="green_only")  %>% filter(is_green) %>% mutate(base_collection_string=as.character(green_base_collections)) %>% filter(!grepl('citeseerx', base_collection_string), !grepl('arxiv', base_collection_string), !grepl('pubmed', base_collection_string), !grepl('pmcid', evidence)) %>% ggplot(aes(x=year, fill=is_green)) + geom_bar(width=1)
+
+
+```
+
+
+
+# By license
+------------
+```{r}
+articles_all %>% filter(is_modern) %>% filter(grepl('cc', license)) %>% ggplot(aes(x=year, fill=license)) + geom_bar(width=1, position="fill") 
+
+```
 
