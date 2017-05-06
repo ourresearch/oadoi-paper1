@@ -168,27 +168,8 @@ sum(publishers$n[0:20]) /sum(publishers$n)
 publishers %>% slice(1:25) %>% ggplot(aes(x=publisher, y=n)) + geom_bar(stat="identity") + coord_flip()
 ```
 
-Looking at top twenty publishers, we get about half of articles. Looks like there is a very long tail of smaller publishers.
+Looking at top twenty publishers, we get about half of articles. Looks like there is a very long tail of smaller publishers. 
 
+coming soon: oa by publisher.
 
-```{r}
-
-publishers %>% slice(1:25) %>% ggplot(aes(x=publisher, y=n, fill=oa)) + 
-  geom_bar(stat="identity") + 
-  coord_flip() +
-  oa_color_map
-```
-
-same thing but by % oa
-```{r}
-
-
-publishers %>% slice(1:25) %>% ggplot(aes(x=publisher, y=n, fill=oa)) + 
-  geom_bar(stat="identity", position="fill") + 
-  coord_flip() +
-  oa_color_map
-
-```
-
-Ending here...more to come laters.
 
