@@ -4,7 +4,7 @@ author: "many"
 output: github_document
 ---
 
-*very much a work in progress*
+*very much a work in progress. we're committing to this regularly, so it's going to be kinda crazy and hard to read until this evening (saturday, may 6).*
 
 ```{r setup, echo=FALSE, warning=FALSE, message=FALSE, results='hide'}
 library(knitr)
@@ -191,11 +191,13 @@ Looking at top twenty publishers, we get about half of articles. Looks like ther
 coming soon: oa by publisher.
 
 
-# Which repositories contribute most to OA availability?
+# Repositories
 ------------
 
 
 ## Growth in literature over time with any green
+We are only counting something as "green" if it's not available in any other format (Gold, hybrid). However, it's also interesting to look at how many articles are being deposited in a repository, regardless of where else they might be open. Let's take a look at that below:
+
 ```{r}
 gray_green_color_map = scale_fill_manual(values=c("#777777", "#008000", "#FFD700"))
 
@@ -210,13 +212,8 @@ found_green_freq_by_year = articles_all %>% filter(is_modern) %>% count(year, fo
 found_green_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=found_green)) + geom_area() + gray_green_color_map
 ```
 
-## Proportion of all articles that can only be accessed through a repository
 
-```{r}
-only_green_freq_by_year = articles_all %>% filter(is_modern) %>% mutate(is_green=oa=="green_only") %>% count(year, is_green) %>% mutate(perc = n / sum(n)) %>% ungroup()  
-
-only_green_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=is_green)) + geom_area() + gray_green_color_map
-```
+Let's look how much different repositories are contributing to the amount of Green OA. (this section very Under Construction still.)
 
 ```{r}
 articles_all %>% filter(is_modern) %>% ggplot(aes(x=year, fill=evidence)) + geom_bar(width=1)
@@ -242,8 +239,21 @@ articles_all %>% filter(is_modern) %>% mutate(is_green=oa=="green_only")  %>% fi
 
 # By license
 ------------
+What are the most common licenses for open-access papers?
+
+
 ```{r}
 articles_all %>% filter(is_modern) %>% filter(grepl('cc', license)) %>% ggplot(aes(x=year, fill=license)) + geom_bar(width=1, position="fill") 
 
+
 ```
+It looks like there has been steady growth in the number of articles licensed with the CC-BY license, largely at the expense of the CC-BY-NC license.
+
+Let's also look at CC licenses by type of OA
+```{r}
+articles_all %>% filter(is_modern) %>% filter(oa != "closed", oa != "free") %>% ggplot(aes(x=oa,  fill=license)) + geom_bar(width=1, position="fill") 
+
+
+```
+Most repositories do not note the license of the work, so green_only is surely an undercount. It's interesting to see that DOAJ journals are more likely to use the more permissive CC-BY license.
 

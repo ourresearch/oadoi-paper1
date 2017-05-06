@@ -2,7 +2,7 @@ OA paper
 ================
 many
 
-*very much a work in progress*
+*very much a work in progress. we're committing to this regularly, so it's going to be kinda crazy and hard to read until this evening (saturday, may 6).*
 
 Results outline - How accurate is our OA detection (from Juan, modified to use hybrid analysis) - How much OA is there? - How is open access changing over time? - How do OA patterns vary across publishers? - Which repositories contribute most to OA availability? - How do OA patterns vary by discipline? - How much OA is there in most highly-accessed papers? - Do different types of OA have different citation patterns?
 
@@ -134,11 +134,13 @@ Looking at top twenty publishers, we get about half of articles. Looks like ther
 
 coming soon: oa by publisher.
 
-\# Which repositories contribute most to OA availability?
----------------------------------------------------------
+\# Repositories
+---------------
 
 Growth in literature over time with any green
 ---------------------------------------------
+
+We are only counting something as "green" if it's not available in any other format (Gold, hybrid). However, it's also interesting to look at how many articles are being deposited in a repository, regardless of where else they might be open. Let's take a look at that below:
 
 ``` r
 gray_green_color_map = scale_fill_manual(values=c("#777777", "#008000", "#FFD700"))
@@ -157,62 +159,63 @@ found_green_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=found_green)) + geo
 
 ![](oa_analysis_files/figure-markdown_github/unnamed-chunk-10-1.png)
 
-Proportion of all articles that can only be accessed through a repository
--------------------------------------------------------------------------
-
-``` r
-only_green_freq_by_year = articles_all %>% filter(is_modern) %>% mutate(is_green=oa=="green_only") %>% count(year, is_green) %>% mutate(perc = n / sum(n)) %>% ungroup()  
-
-only_green_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=is_green)) + geom_area() + gray_green_color_map
-```
-
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-11-1.png)
+Let's look how much different repositories are contributing to the amount of Green OA. (this section very Under Construction still.)
 
 ``` r
 articles_all %>% filter(is_modern) %>% ggplot(aes(x=year, fill=evidence)) + geom_bar(width=1)
 ```
 
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-12-1.png)
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-11-1.png)
 
 ``` r
 articles_all %>% filter(is_modern) %>% mutate(is_green=oa=="green_only")  %>% filter(is_green) %>% filter(grepl('pmcid', evidence)) %>% ggplot(aes(x=year, fill=is_green)) + geom_bar(width=1)
 ```
 
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-12-2.png)
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-11-2.png)
 
 ``` r
 # citeseerx
 articles_all %>% filter(is_modern) %>% mutate(is_green=oa=="green_only")  %>% filter(is_green) %>% mutate(base_collection_string=as.character(green_base_collections)) %>% filter(grepl('citeseerx', base_collection_string)) %>% ggplot(aes(x=year, fill=is_green)) + geom_bar(width=1)
 ```
 
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-12-3.png)
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-11-3.png)
 
 ``` r
 # arxiv
 articles_all %>% filter(is_modern) %>% mutate(is_green=oa=="green_only")  %>% filter(is_green) %>% mutate(base_collection_string=as.character(green_base_collections)) %>% filter(grepl('arxiv', base_collection_string)) %>% ggplot(aes(x=year, fill=is_green)) + geom_bar(width=1)
 ```
 
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-12-4.png)
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-11-4.png)
 
 ``` r
 # pubmed
 articles_all %>% filter(is_modern) %>% mutate(is_green=oa=="green_only")  %>% filter(is_green) %>% mutate(base_collection_string=as.character(green_base_collections)) %>% filter(grepl('pubmed', base_collection_string)) %>% ggplot(aes(x=year, fill=is_green)) + geom_bar(width=1)
 ```
 
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-12-5.png)
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-11-5.png)
 
 ``` r
 # not citeseerx or arxiv or pubmed
 articles_all %>% filter(is_modern) %>% mutate(is_green=oa=="green_only")  %>% filter(is_green) %>% mutate(base_collection_string=as.character(green_base_collections)) %>% filter(!grepl('citeseerx', base_collection_string), !grepl('arxiv', base_collection_string), !grepl('pubmed', base_collection_string), !grepl('pmcid', evidence)) %>% ggplot(aes(x=year, fill=is_green)) + geom_bar(width=1)
 ```
 
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-12-6.png)
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-11-6.png)
 
 \# By license
 -------------
+
+What are the most common licenses for open-access papers?
 
 ``` r
 articles_all %>% filter(is_modern) %>% filter(grepl('cc', license)) %>% ggplot(aes(x=year, fill=license)) + geom_bar(width=1, position="fill") 
 ```
 
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-13-1.png)
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-12-1.png) It looks like there has been steady growth in the number of articles licensed with the CC-BY license, largely at the expense of the CC-BY-NC license.
+
+Let's also look at CC licenses by type of OA
+
+``` r
+articles_all %>% filter(is_modern) %>% filter(oa != "closed", oa != "free") %>% ggplot(aes(x=oa,  fill=license)) + geom_bar(width=1, position="fill") 
+```
+
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-13-1.png) Most repositories do not note the license of the work, so green\_only is surely an undercount. It's interesting to see that DOAJ journals are more likely to use the more permissive CC-BY license.
