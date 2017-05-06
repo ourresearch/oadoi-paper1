@@ -138,38 +138,42 @@ oa_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=oa)) + geom_area() + oa_colo
 ```
 
 
-The proportion of OA is 
+The proportion of OA is growing, too--not just the absolute amounts.
 
 
 # publishers
 # ========================
 
-# sort the publisher factor by frequency...helps in plotting.
+Let's look at publishers. We'll subset the years even further, so we can look at the more up-to-date picture that may include OA publishers.
+
 ```{r}
 
-articles_recent$publisher = fct_infreq(articles_recent$publisher)
+# sort the publisher factor by frequency...helps in plotting.
+articles_all$publisher = fct_infreq(articles_all$publisher)
 
-publishers = articles_recent %>% 
-  count(publisher, oa) %>%
-  arrange(desc(n)) %>%
-  ungroup()
+publishers = articles_all %>% 
+    filter(is_modern, year >= 2009) %>%
+    count(publisher, oa) %>%
+    arrange(desc(n)) %>%
+    ungroup()
 
 # the top 25 publishers publish 80% of articles.
 # top 100 publshers publish 87% of articles.
-sum(publishers$n[0:100]) /sum(publishers$n)
+sum(publishers$n[0:20]) /sum(publishers$n)
 ```
+
+
 
 ```{r}
 publishers %>% slice(1:25) %>% ggplot(aes(x=publisher, y=n)) + geom_bar(stat="identity") + coord_flip()
 ```
 
+Looking at top twenty publishers, we get about half of articles. Looks like there is a very long tail of smaller publishers.
+
+
 ```{r}
-publishers_oa = articles_recent %>% 
-  count(publisher, oa) %>%
-  ungroup()
 
-
-publishers_oa %>% slice(1:80) %>% ggplot(aes(x=publisher, y=n, fill=oa)) + 
+publishers %>% slice(1:25) %>% ggplot(aes(x=publisher, y=n, fill=oa)) + 
   geom_bar(stat="identity") + 
   coord_flip() +
   oa_color_map
@@ -177,73 +181,14 @@ publishers_oa %>% slice(1:80) %>% ggplot(aes(x=publisher, y=n, fill=oa)) +
 
 same thing but by % oa
 ```{r}
-publishers_oa %>% slice(1:80) %>% ggplot(aes(x=publisher, y=n, fill=oa)) + 
+
+
+publishers %>% slice(1:25) %>% ggplot(aes(x=publisher, y=n, fill=oa)) + 
   geom_bar(stat="identity", position="fill") + 
   coord_flip() +
   oa_color_map
 
 ```
 
-
-
-
-
-```{r}
-
-articles_all$journal = fct_infreq(articles_all$journal)
-
-journals = articles_all %>% 
-  count(journal, oa) %>%
-  arrange(desc(n)) %>%
-  ungroup()
-
-sum(journals$n[0:100]) /sum(journals$n)
-
-journals_oa = articles_all %>% 
-  count(journal, oa) %>%
-  ungroup()
-
-
-journals_oa %>% slice(1:275) %>% ggplot(aes(x=journal, y=n, fill=oa)) + 
-  geom_bar(stat="identity") + 
-  coord_flip() +
-  oa_color_map
-```
-
-same thing but by % oa
-```{r}
-journals_oa %>% slice(0:76) %>% ggplot(aes(x=journal, y=n, fill=oa)) + 
-  geom_bar(stat="identity", position="fill") + 
-  coord_flip() +
-  oa_color_map
-
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-_subjects_
-
-unpack subjects into a list
-```{r}
-# articles %>% 
-# select(subject, oa) %>%
-# filter(as.character(subject) != "") %>%
-# rowwise()  %>%
-# mutate( subj_list = list( fromJSON( as.character( subject ) ) ) )
-
-
-# articles$subject[0:10]
-```
-
-
+Ending here...more to come laters.
 
