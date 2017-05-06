@@ -134,24 +134,4 @@ publishers %>% slice(1:25) %>% ggplot(aes(x=publisher, y=n)) + geom_bar(stat="id
 
 Looking at top twenty publishers, we get about half of articles. Looks like there is a very long tail of smaller publishers.
 
-``` r
-publishers %>% slice(1:25) %>% ggplot(aes(x=publisher, y=n, fill=oa)) + 
-  geom_bar(stat="identity") + 
-  coord_flip() +
-  oa_color_map
-```
-
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-10-1.png)
-
-same thing but by % oa
-
-``` r
-publishers %>% slice(1:25) %>% ggplot(aes(x=publisher, y=n, fill=oa)) + 
-  geom_bar(stat="identity", position="fill") + 
-  coord_flip() +
-  oa_color_map
-```
-
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-11-1.png)
-
-Ending here...more to come laters.
+coming soon: oa by publisher.
