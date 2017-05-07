@@ -167,32 +167,43 @@ The proportion of OA is growing, too--not just the absolute amounts.
 
 
 
-# publishers
-# ========================
+# Publishers
+========================
 
 Let's look at publishers. We'll subset the years even further, so we can look at the more up-to-date picture that may include OA publishers.
 
 ```{r}
 
-# sort the publisher factor by frequency...helps in plotting.
-articles_all$publisher = fct_infreq(articles_all$publisher)
+articles_recent = articles_all %>% filter(is_modern, year >= 2009)
+articles_recent$publisher = fct_infreq(articles_recent$publisher)
 
-publishers = articles_all %>% 
-    filter(is_modern, year >= 2009) %>%
-    count(publisher, oa) %>%
-    arrange(desc(n)) %>%
-    ungroup()
+publishers = articles_recent %>% count(publisher) %>%
+  ungroup()
 
 # the top 25 publishers publish 80% of articles.
 # top 100 publshers publish 87% of articles.
-sum(publishers$n[0:20]) /sum(publishers$n)
+sum(publishers$n[0:100]) /sum(publishers$n)
+#publishers %>% slice(1:25) %>% ggplot(aes(x=publisher, y=n)) + geom_bar(stat="identity") + coord_flip()
+
+publishers_oa = articles_recent %>% 
+  count(publisher, oa) %>%
+  ungroup()
+
+
+publishers_oa %>% slice(1:80) %>% ggplot(aes(x=publisher, y=n, fill=oa)) + 
+  geom_bar(stat="identity") + 
+  coord_flip() +
+  oa_color_map
+
+#same thing but by % oa
+
+publishers_oa %>% slice(1:100) %>% ggplot(aes(x=publisher, y=n, fill=oa)) + 
+  geom_bar(stat="identity", position="fill") + 
+  coord_flip() +
+  oa_color_map
 ```
 
 
-
-```{r}
-publishers %>% slice(1:25) %>% ggplot(aes(x=publisher, y=n)) + geom_bar(stat="identity") + coord_flip()
-```
 
 Looking at top twenty publishers, we get about half of articles. Looks like there is a very long tail of smaller publishers. 
 
@@ -250,7 +261,7 @@ Most repositories do not note the license of the work, so green_only is surely a
 
 # By discipline
 ==============
-do this.
+TBD
 
 
 

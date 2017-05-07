@@ -21,11 +21,11 @@ articles_all %>% count(oa) %>% mutate(proportion=n/sum(n))
     ## # A tibble: 5 × 3
     ##              oa     n proportion
     ##          <fctr> <int>      <dbl>
-    ## 1        closed 76758 0.76877160
-    ## 2          free 11300 0.11317542
-    ## 3    green_only  6293 0.06302769
+    ## 1        closed 76854 0.76973309
+    ## 2          free 11232 0.11249437
+    ## 3    green_only  6264 0.06273724
     ## 4     gold_doaj  3559 0.03564525
-    ## 5 gold_not_doaj  1935 0.01938004
+    ## 5 gold_not_doaj  1936 0.01939005
 
 -   insert definitions of our colors here...see the email for now \*
 
@@ -100,36 +100,51 @@ oa_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=oa)) + geom_area() + oa_colo
 
 The proportion of OA is growing, too--not just the absolute amounts.
 
-publishers
-==========
-
-========================
-========================
+\# Publishers
+=============
 
 Let's look at publishers. We'll subset the years even further, so we can look at the more up-to-date picture that may include OA publishers.
 
 ``` r
-# sort the publisher factor by frequency...helps in plotting.
-articles_all$publisher = fct_infreq(articles_all$publisher)
+articles_recent = articles_all %>% filter(is_modern, year >= 2009)
+articles_recent$publisher = fct_infreq(articles_recent$publisher)
 
-publishers = articles_all %>% 
-    filter(is_modern, year >= 2009) %>%
-    count(publisher, oa) %>%
-    arrange(desc(n)) %>%
-    ungroup()
+publishers = articles_recent %>% count(publisher) %>%
+  ungroup()
 
 # the top 25 publishers publish 80% of articles.
 # top 100 publshers publish 87% of articles.
-sum(publishers$n[0:20]) /sum(publishers$n)
+sum(publishers$n[0:100]) /sum(publishers$n)
 ```
 
-    ## [1] 0.5539286
+    ## [1] 0.8347604
 
 ``` r
-publishers %>% slice(1:25) %>% ggplot(aes(x=publisher, y=n)) + geom_bar(stat="identity") + coord_flip()
+#publishers %>% slice(1:25) %>% ggplot(aes(x=publisher, y=n)) + geom_bar(stat="identity") + coord_flip()
+
+publishers_oa = articles_recent %>% 
+  count(publisher, oa) %>%
+  ungroup()
+
+
+publishers_oa %>% slice(1:80) %>% ggplot(aes(x=publisher, y=n, fill=oa)) + 
+  geom_bar(stat="identity") + 
+  coord_flip() +
+  oa_color_map
 ```
 
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-8-1.png)
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-7-1.png)
+
+``` r
+#same thing but by % oa
+
+publishers_oa %>% slice(1:100) %>% ggplot(aes(x=publisher, y=n, fill=oa)) + 
+  geom_bar(stat="identity", position="fill") + 
+  coord_flip() +
+  oa_color_map
+```
+
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-7-2.png)
 
 Looking at top twenty publishers, we get about half of articles. Looks like there is a very long tail of smaller publishers.
 
@@ -154,7 +169,7 @@ What are the most common licenses for open-access papers?
 articles_all %>% filter(is_modern) %>% filter(grepl('cc', license)) %>% ggplot(aes(x=year, fill=license)) + geom_bar(width=1, position="fill") 
 ```
 
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-9-1.png) It looks like there has been steady growth in the number of articles licensed with the CC-BY license, largely at the expense of the CC-BY-NC license.
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-8-1.png) It looks like there has been steady growth in the number of articles licensed with the CC-BY license, largely at the expense of the CC-BY-NC license.
 
 Let's also look at CC licenses by type of OA
 
@@ -162,12 +177,12 @@ Let's also look at CC licenses by type of OA
 articles_all %>% filter(is_modern) %>% filter(oa != "closed", oa != "free") %>% ggplot(aes(x=oa,  fill=license)) + geom_bar(width=1, position="fill") 
 ```
 
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-10-1.png) Most repositories do not note the license of the work, so green\_only is surely an undercount. It's interesting to see that DOAJ journals are more likely to use the more permissive CC-BY license.
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-9-1.png) Most repositories do not note the license of the work, so green\_only is surely an undercount. It's interesting to see that DOAJ journals are more likely to use the more permissive CC-BY license.
 
 \# By discipline
 ================
 
-do this.
+TBD
 
 \# How much OA is there for most-accessed papers?
 =================================================
@@ -209,7 +224,7 @@ articles_accessed %>% count(oa) %>% mutate(proportion=n/sum(n))
 articles_accessed %>% ggplot(aes(x="", fill=oa)) + geom_bar() + oa_color_map_accessed
 ```
 
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-11-1.png)
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-10-1.png)
 
 ``` r
 articles_accessed = articles_accessed %>% mutate(is_modern = year >= 1990 & year <= 2015)
@@ -228,7 +243,7 @@ articles_accessed %>% filter(is_modern) %>%
     ggplot(aes(x=year, fill=oa)) + geom_bar(width=1) + oa_color_map_accessed
 ```
 
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-11-2.png)
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-10-2.png)
 
 ``` r
 oa_freq_by_year = articles_accessed %>% filter(is_modern) %>% count(year, oa) %>%  
@@ -238,7 +253,7 @@ oa_freq_by_year = articles_accessed %>% filter(is_modern) %>% count(year, oa) %>
 oa_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=oa)) + geom_area() + oa_color_map_accessed
 ```
 
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-11-3.png)
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-10-3.png)
 
 \# OA and citation patterns
 ===========================
