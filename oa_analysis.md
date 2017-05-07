@@ -21,13 +21,19 @@ articles_all %>% count(oa) %>% mutate(proportion=n/sum(n))
     ## # A tibble: 5 × 3
     ##              oa     n proportion
     ##          <fctr> <int>      <dbl>
-    ## 1        closed 76854 0.76973309
-    ## 2          free 11232 0.11249437
-    ## 3    green_only  6264 0.06273724
+    ## 1        closed 76758 0.76877160
+    ## 2          free 11300 0.11317542
+    ## 3    green_only  6293 0.06302769
     ## 4     gold_doaj  3559 0.03564525
-    ## 5 gold_not_doaj  1936 0.01939005
+    ## 5 gold_not_doaj  1935 0.01938004
 
--   insert definitions of our colors here...see the email for now \*
+Category definitions:
+
+-   *closed*: We could not find a free fulltext copy.
+-   *free*: There is a free-to-read copy on the publisher page, but no license is given and the journal is not in DOAJ.
+-   *green\_only*: The article is Green OA. There is a fulltext copy of the article in one or more open repositories, but not on the publisher page.
+-   *gold\_doaj* The article is Gold OA. There is a copy on the publisher page, and the journal is listed in the DOAJ.
+-   *gold\_not\_doaj*: The article is Gold OA. There is a copy on the publisher page, under a Creative Commons license.
 
 So, about 23% of the DOI-assigned literature is available to read. Given that we’re sampling from 65,838,767 total journal articles with a Crossref DOI, that means we can estimate there are *at least* 65838767 \* 0.232 = 15274594 free-to-read articles (15.2 million).
 
@@ -103,7 +109,7 @@ The proportion of OA is growing, too--not just the absolute amounts.
 \# Publishers
 =============
 
-Let's look at publishers. We'll subset the years even further, so we can look at the more up-to-date picture that may include OA publishers.
+Let's look at publishers. We'll subset the years more tightly and just look at articles since 2009. This will let us look at the more up-to-date picture that may include OA publishers.
 
 ``` r
 articles_recent = articles_all %>% filter(is_modern, year >= 2009)
@@ -138,13 +144,15 @@ publishers_oa %>% slice(1:80) %>% ggplot(aes(x=publisher, y=n, fill=oa)) +
 ``` r
 #same thing but by % oa
 
-publishers_oa %>% slice(1:100) %>% ggplot(aes(x=publisher, y=n, fill=oa)) + 
+publishers_oa %>% slice(1:80) %>% ggplot(aes(x=publisher, y=n, fill=oa)) + 
   geom_bar(stat="identity", position="fill") + 
   coord_flip() +
   oa_color_map
 ```
 
 ![](oa_analysis_files/figure-markdown_github/unnamed-chunk-7-2.png)
+
+From this we can see that Elsevier is massively outpublishing anyone else. Because of this, they are also publishing more open-access content than any other single publisher. However, in percentage terms other publshers are doing much better at making content open. Unsurprisingly, the American Physical Society stands out as having more Green OA than other publishers in percentage terms, because of the prevelance of the ArXiv in Physics. PLOS stands out as the only open-access-only publisher in the list of top publishers.
 
 \# Repositories
 ===============
@@ -171,7 +179,7 @@ found_green_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=found_green)) + geo
 
 ![](oa_analysis_files/figure-markdown_github/unnamed-chunk-9-1.png)
 
-A different question is to dig into which repositories are contributing to making papers available.
+A different question is to dig into which repositories are contributing to making papers available. We know that PubMed Central and the ArXiv are both very popular repositories, so we will plot them seperately. We'll combine all other repositories, including the thousands of institutional repositories, into a single category for now. As a reminder, we are only looking here at articles that are *only* available from a green repository.
 
 We can see in the graphs at
 
@@ -191,6 +199,21 @@ articles_all %>% filter(is_modern) %>% filter(!is.na(repo)) %>% ggplot(aes(x=yea
 
 ![](oa_analysis_files/figure-markdown_github/unnamed-chunk-10-1.png)
 
+Again, it apprears that multi-year embargoes maybe affecting PMC. Regardless of this, PMC remains by far the most significant green repository, and a very important source of fulltext that would be otherwise unavailable.
+
+``` r
+articles_all %>% filter(year > 2009, oa=="green_only") %>% count(repo) %>% mutate(proportion=n/sum(n))
+```
+
+    ## # A tibble: 3 × 3
+    ##     repo     n proportion
+    ##   <fctr> <int>      <dbl>
+    ## 1    PMC  1170  0.4277879
+    ## 2  other  1156  0.4226691
+    ## 3  arXiv   409  0.1495430
+
+That said, smaller repositories are still making a significant contribution to Green OA, particularly in recent years. for articles published since 2009, the contribute about as much as PMC (42%).
+
 \# By license
 =============
 
@@ -200,7 +223,7 @@ What are the most common licenses for open-access papers?
 articles_all %>% filter(is_modern) %>% filter(grepl('cc', license)) %>% ggplot(aes(x=year, fill=license)) + geom_bar(width=1, position="fill") 
 ```
 
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-11-1.png) It looks like there has been steady growth in the number of articles licensed with the CC-BY license, largely at the expense of the CC-BY-NC license.
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-12-1.png) It looks like there has been steady growth in the number of articles licensed with the CC-BY license, largely at the expense of the CC-BY-NC license.
 
 Let's also look at CC licenses by type of OA
 
@@ -208,7 +231,7 @@ Let's also look at CC licenses by type of OA
 articles_all %>% filter(is_modern) %>% filter(oa != "closed", oa != "free") %>% ggplot(aes(x=oa,  fill=license)) + geom_bar(width=1, position="fill") 
 ```
 
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-12-1.png) Most repositories do not note the license of the work, so green\_only is surely an undercount. It's interesting to see that DOAJ journals are more likely to use the more permissive CC-BY license.
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-13-1.png) Most repositories do not note the license of the work, so green\_only is surely an undercount. It's interesting to see that DOAJ journals are more likely to use the more permissive CC-BY license. This graph needs different colors, so that license=NA is shown as gray.
 
 \# By discipline
 ================
@@ -255,7 +278,7 @@ articles_accessed %>% count(oa) %>% mutate(proportion=n/sum(n))
 articles_accessed %>% ggplot(aes(x="", fill=oa)) + geom_bar() + oa_color_map_accessed
 ```
 
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-13-1.png)
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-14-1.png)
 
 ``` r
 articles_accessed = articles_accessed %>% mutate(is_modern = year >= 1990 & year <= 2015)
@@ -274,7 +297,7 @@ articles_accessed %>% filter(is_modern) %>%
     ggplot(aes(x=year, fill=oa)) + geom_bar(width=1) + oa_color_map_accessed
 ```
 
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-13-2.png)
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-14-2.png)
 
 ``` r
 oa_freq_by_year = articles_accessed %>% filter(is_modern) %>% count(year, oa) %>%  
@@ -284,7 +307,7 @@ oa_freq_by_year = articles_accessed %>% filter(is_modern) %>% count(year, oa) %>
 oa_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=oa)) + geom_area() + oa_color_map_accessed
 ```
 
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-13-3.png)
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-14-3.png)
 
 \# OA and citation patterns
 ===========================
