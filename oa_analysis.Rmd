@@ -26,34 +26,9 @@ library(jsonlite)
 library(tidyr)
 ```
 
-To do next
-- make table for amount of oa in last five years, more sentences describing j
-- comment out the single bar graph 1min
-
-- add a bunch more sentences to accessed section
-- fix labels on accessed section
-
-- put a TBD section for by discipline  1min
-- put TBD for "How accurate is our OA detection" and "Do different types of OA have different citation patterns?" 1min
-
-- say "under construction" for publisher, repos
 
 
-decide what to do about
-- 2016 and 2017 are the most accessed years, but leaving them out of analysis
-
-
-if time
-- fix publisher section
-- repository section needs help
- 
-
-for later
-- look into why 65mil not 75mil
-- multiply out so get total number of articles
-
-
-Results outline
+Results outline so far:
 - How accurate is our OA detection
     (from Juan, modified to use hybrid analysis)
 - How much OA is there?
@@ -64,15 +39,6 @@ Results outline
 - How much OA is there in most highly-accessed papers?
 - Do different types of OA have different citation patterns?
 
-Discussion
-- limitations
-    - some free-to-read where we don't get it (ResearchGate, personal web pages)
-    - articles without DOIs
-- future work
-    - more citation, altmetrics studies
-- expounding on what this means for the future of OA
-- take-home
-    - OA isn't evenly distributed, and there is more OA where it is more needed: in recent, highly accessed articles.
 
 
 ```{r get_data, echo=FALSE, cache=TRUE, results='hide'}
@@ -108,6 +74,9 @@ oa_color_map = scale_fill_manual(values=c("#777777", "#2196F3", "#4CAF50", "#FFC
 
 
 
+# How accurate is our OA detection
+=======================
+put juan's stuff here.
 
 
 
@@ -123,12 +92,13 @@ oa_color_map = scale_fill_manual(values=c("#777777", "#2196F3", "#4CAF50", "#FFC
 
 ```{r}
 articles_all %>% count(oa) %>% mutate(proportion=n/sum(n))
-articles_all %>% ggplot(aes(x="", fill=oa)) + geom_bar() + oa_color_map
 
 ```
-* insert definitions of our colors here *
+* insert definitions of our colors here...see the email for now *
 
-So, about 23% of the DOI-assigned literature is available to read. But we know that in recent years OA has been gaining steam, so let's let's look more closely at OA over time.
+So, about 23% of the DOI-assigned literature is available to read. Given that we’re sampling from 65,838,767 total journal articles with a Crossref DOI, that means we can estimate there are *at least* 65838767 * 0.232 = 15274594 free-to-read articles (15.2 million). 
+
+But we know that in recent years OA has been gaining steam, so let's let's look more closely at OA over time.
 
 
 
@@ -190,6 +160,13 @@ oa_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=oa)) + geom_area() + oa_colo
 The proportion of OA is growing, too--not just the absolute amounts.
 
 
+
+
+
+
+
+
+
 # publishers
 # ========================
 
@@ -222,8 +199,16 @@ Looking at top twenty publishers, we get about half of articles. Looks like ther
 coming soon: oa by publisher.
 
 
+
+
+
+
+
+
+
+
 # Repositories
-------------
+==============
 
 
 ## Growth in literature over time with any green
@@ -233,8 +218,12 @@ We are only counting something as "green" if it's not available in any other for
 
 
 
+
+
+
+
 # By license
-------------
+============
 What are the most common licenses for open-access papers?
 
 
@@ -253,8 +242,26 @@ articles_all %>% filter(is_modern) %>% filter(oa != "closed", oa != "free") %>% 
 ```
 Most repositories do not note the license of the work, so green_only is surely an undercount. It's interesting to see that DOAJ journals are more likely to use the more permissive CC-BY license.
 
-# What are OA percents by most accessed
---------------
+
+
+
+
+
+
+# By discipline
+==============
+do this.
+
+
+
+
+
+
+
+
+
+# How much OA is there for most-accessed papers?
+============
 
 DOIs accessed through Unpaywall on April 20, 2017.
 50k accesses, 30k unique DOIs, 9k unique IP addresses.
@@ -303,3 +310,13 @@ oa_freq_by_year = articles_accessed %>% filter(is_modern) %>% count(year, oa) %>
 
 oa_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=oa)) + geom_area() + oa_color_map_accessed
 ```
+
+
+# OA and citation patterns
+=====================
+put steffi and vincent's stuff in here.
+
+
+
+
+

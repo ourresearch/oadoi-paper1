@@ -4,25 +4,12 @@ many
 
 *very much a work in progress. we're committing to this regularly, so it's going to be kinda crazy and hard to read until this evening (saturday, may 6).*
 
-To do next - make table for amount of oa in last five years, more sentences describing j - comment out the single bar graph 1min
+Results outline so far: - How accurate is our OA detection (from Juan, modified to use hybrid analysis) - How much OA is there? - How is open access changing over time? - How do OA patterns vary across publishers? - Which repositories contribute most to OA availability? - How do OA patterns vary by discipline? - How much OA is there in most highly-accessed papers? - Do different types of OA have different citation patterns?
 
--   add a bunch more sentences to accessed section
--   fix labels on accessed section
+\# How accurate is our OA detection
+===================================
 
--   put a TBD section for by discipline 1min
--   put TBD for "How accurate is our OA detection" and "Do different types of OA have different citation patterns?" 1min
-
--   say "under construction" for publisher, repos
-
-decide what to do about - 2016 and 2017 are the most accessed years, but leaving them out of analysis
-
-if time - fix publisher section - repository section needs help
-
-for later - look into why 65mil not 75mil - multiply out so get total number of articles
-
-Results outline - How accurate is our OA detection (from Juan, modified to use hybrid analysis) - How much OA is there? - How is open access changing over time? - How do OA patterns vary across publishers? - Which repositories contribute most to OA availability? - How do OA patterns vary by discipline? - How much OA is there in most highly-accessed papers? - Do different types of OA have different citation patterns?
-
-Discussion - limitations - some free-to-read where we don't get it (ResearchGate, personal web pages) - articles without DOIs - future work - more citation, altmetrics studies - expounding on what this means for the future of OA - take-home - OA isn't evenly distributed, and there is more OA where it is more needed: in recent, highly accessed articles.
+put juan's stuff here.
 
 \# How much OA is there?
 ========================
@@ -34,19 +21,17 @@ articles_all %>% count(oa) %>% mutate(proportion=n/sum(n))
     ## # A tibble: 5 × 3
     ##              oa     n proportion
     ##          <fctr> <int>      <dbl>
-    ## 1        closed 76854 0.76973309
-    ## 2          free 11232 0.11249437
-    ## 3    green_only  6264 0.06273724
+    ## 1        closed 76758 0.76877160
+    ## 2          free 11300 0.11317542
+    ## 3    green_only  6293 0.06302769
     ## 4     gold_doaj  3559 0.03564525
-    ## 5 gold_not_doaj  1936 0.01939005
+    ## 5 gold_not_doaj  1935 0.01938004
 
-``` r
-articles_all %>% ggplot(aes(x="", fill=oa)) + geom_bar() + oa_color_map
-```
+-   insert definitions of our colors here...see the email for now \*
 
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-1-1.png) \* insert definitions of our colors here \*
+So, about 23% of the DOI-assigned literature is available to read. Given that we’re sampling from 65,838,767 total journal articles with a Crossref DOI, that means we can estimate there are *at least* 65838767 \* 0.232 = 15274594 free-to-read articles (15.2 million).
 
-So, about 23% of the DOI-assigned literature is available to read. But we know that in recent years OA has been gaining steam, so let's let's look more closely at OA over time.
+But we know that in recent years OA has been gaining steam, so let's let's look more closely at OA over time.
 
 \# How is open access changing over time?
 =========================================
@@ -138,7 +123,7 @@ publishers = articles_all %>%
 sum(publishers$n[0:20]) /sum(publishers$n)
 ```
 
-    ## [1] 0.5540006
+    ## [1] 0.5539286
 
 ``` r
 publishers %>% slice(1:25) %>% ggplot(aes(x=publisher, y=n)) + geom_bar(stat="identity") + coord_flip()
@@ -151,7 +136,7 @@ Looking at top twenty publishers, we get about half of articles. Looks like ther
 coming soon: oa by publisher.
 
 \# Repositories
----------------
+===============
 
 Growth in literature over time with any green
 ---------------------------------------------
@@ -161,7 +146,7 @@ We are only counting something as "green" if it's not available in any other for
 (TBD)
 
 \# By license
--------------
+=============
 
 What are the most common licenses for open-access papers?
 
@@ -179,8 +164,13 @@ articles_all %>% filter(is_modern) %>% filter(oa != "closed", oa != "free") %>% 
 
 ![](oa_analysis_files/figure-markdown_github/unnamed-chunk-10-1.png) Most repositories do not note the license of the work, so green\_only is surely an undercount. It's interesting to see that DOAJ journals are more likely to use the more permissive CC-BY license.
 
-\# What are OA percents by most accessed
-----------------------------------------
+\# By discipline
+================
+
+do this.
+
+\# How much OA is there for most-accessed papers?
+=================================================
 
 DOIs accessed through Unpaywall on April 20, 2017. 50k accesses, 30k unique DOIs, 9k unique IP addresses. (we will fix the plots so the two types of gold are beside each other) This analysis is using the 30k DOIs.
 
@@ -249,3 +239,8 @@ oa_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=oa)) + geom_area() + oa_colo
 ```
 
 ![](oa_analysis_files/figure-markdown_github/unnamed-chunk-11-3.png)
+
+\# OA and citation patterns
+===========================
+
+put steffi and vincent's stuff in here.
