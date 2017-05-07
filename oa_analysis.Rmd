@@ -205,17 +205,6 @@ publishers_oa %>% slice(1:100) %>% ggplot(aes(x=publisher, y=n, fill=oa)) +
 
 
 
-Looking at top twenty publishers, we get about half of articles. Looks like there is a very long tail of smaller publishers. 
-
-coming soon: oa by publisher.
-
-
-
-
-
-
-
-
 
 
 # Repositories
@@ -223,12 +212,39 @@ coming soon: oa by publisher.
 
 
 ## Growth in literature over time with any green
-We are only counting something as "green" if it's not available in any other format (Gold, hybrid). However, it's also interesting to look at how many articles are being deposited in a repository, regardless of where else they might be open. Let's take a look at that below:
+We are only counting something as "green" if it's not available in any other format (Gold, hybrid). However, it's also interesting to look at how many articles are available in a repository, regardless of where else they might be open. Let's take a look at that below:
 
-(TBD)
+```{r}
+gray_green_color_map = scale_fill_manual(values=c("#777777", "#008000", "#FFD700"))
 
+articles_all %>% filter(is_modern) %>% ggplot(aes(x=year, fill=found_green)) + geom_bar(width=1) + gray_green_color_map
+```
+As a proportion of all articles, deposits into repositories has been going up, with a recent drop.  Embargos probaby play a large part in this, though deposit into places like ResearchGate (not included in our repository numbers) rather than institutional repositories may as well.
 
+```{r}
+found_green_freq_by_year = articles_all %>% filter(is_modern) %>% count(year, found_green) %>%
+  mutate(perc = n / sum(n)) %>%
+  ungroup()
+found_green_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=found_green)) + geom_area() + gray_green_color_map
+```
 
+A different question is to dig into which repositories are contributing to making papers available.
+
+We can see in the graphs at 
+```{r}
+articles_all = articles_all %>% mutate(base_collection_string=as.character(green_base_collections))
+
+articles_all$repo = NULL
+articles_all$repo[articles_all$oa=="green_only"] = "other"
+articles_all$repo[grepl('pmcid', articles_all$evidence)] = "PMC"
+articles_all$repo[grepl('pubmed', articles_all$base_collection_string)] = "PMC"
+articles_all$repo[grepl('arxiv', articles_all$base_collection_string)] = "arXiv"
+
+articles_all = mutate(articles_all, repo=fct_infreq(repo))
+
+articles_all %>% filter(is_modern) %>% filter(!is.na(repo)) %>% ggplot(aes(x=year, fill=repo)) + geom_bar(width=1)
+
+```
 
 
 
