@@ -34,6 +34,7 @@ vignettes/*.pdf
 
 # data
 *.csv
+*.gz
 
 # notebook web pages (for now, because github can't render them)
 *.nb.html
