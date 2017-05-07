@@ -2,7 +2,7 @@ OA paper
 ================
 many
 
-*very much a work in progress. we're committing to this regularly, so it's going to be kinda crazy and hard to read until this evening (saturday, may 6).*
+*very much a work in progress. we're committing to this regularly.*
 
 Results outline so far: - How accurate is our OA detection (from Juan, modified to use hybrid analysis) - How much OA is there? - How is open access changing over time? - How do OA patterns vary across publishers? - Which repositories contribute most to OA availability? - How do OA patterns vary by discipline? - How much OA is there in most highly-accessed papers? - Do different types of OA have different citation patterns?
 
