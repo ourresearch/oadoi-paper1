@@ -4,9 +4,34 @@ many
 
 *very much a work in progress. we're committing to this regularly, so it's going to be kinda crazy and hard to read until this evening (saturday, may 6).*
 
+To do next - make table for amount of oa in last five years, more sentences describing j - comment out the single bar graph 1min
+
+-   add a bunch more sentences to accessed section
+-   fix labels on accessed section
+
+-   put a TBD section for by discipline 1min
+-   put TBD for "How accurate is our OA detection" and "Do different types of OA have different citation patterns?" 1min
+
+-   say "under construction" for publisher, repos
+
+-   describe unpaywall
+-   describe userbase of unpaywall
+-   the number of calls to the api
+-   percent of dois with more than one accesses
+-   number of unique IP addresses
+-   DOI based analysis
+-   we'll include one or two of these graphs, not sure which yet
+-   for the most viewed articles, the OA story is better, and getting even better
+
+decide what to do about - 2016 and 2017 are the most accessed years, but leaving them out of analysis
+
+if time - fix publisher section - repository section needs help
+
+for later - look into why 65mil not 75mil - multiply out so get total number of articles
+
 Results outline - How accurate is our OA detection (from Juan, modified to use hybrid analysis) - How much OA is there? - How is open access changing over time? - How do OA patterns vary across publishers? - Which repositories contribute most to OA availability? - How do OA patterns vary by discipline? - How much OA is there in most highly-accessed papers? - Do different types of OA have different citation patterns?
 
-Discussion - limitations - some free-to-read where we don't get it (ResearchGate, personal web pages) - articles without DOIs - future work - more citation, altmetrics studies - expounding on what this means for the future of OA
+Discussion - limitations - some free-to-read where we don't get it (ResearchGate, personal web pages) - articles without DOIs - future work - more citation, altmetrics studies - expounding on what this means for the future of OA - take-home - OA isn't evenly distributed, and there is more OA where it is more needed: in recent, highly accessed articles.
 
 \# How much OA is there?
 ========================
@@ -18,11 +43,11 @@ articles_all %>% count(oa) %>% mutate(proportion=n/sum(n))
     ## # A tibble: 5 × 3
     ##              oa     n proportion
     ##          <fctr> <int>      <dbl>
-    ## 1        closed 76758 0.76877160
-    ## 2          free 11300 0.11317542
-    ## 3    green_only  6293 0.06302769
+    ## 1        closed 76854 0.76973309
+    ## 2          free 11232 0.11249437
+    ## 3    green_only  6264 0.06273724
     ## 4     gold_doaj  3559 0.03564525
-    ## 5 gold_not_doaj  1935 0.01938004
+    ## 5 gold_not_doaj  1936 0.01939005
 
 ``` r
 articles_all %>% ggplot(aes(x="", fill=oa)) + geom_bar() + oa_color_map
@@ -122,7 +147,7 @@ publishers = articles_all %>%
 sum(publishers$n[0:20]) /sum(publishers$n)
 ```
 
-    ## [1] 0.5539286
+    ## [1] 0.5540006
 
 ``` r
 publishers %>% slice(1:25) %>% ggplot(aes(x=publisher, y=n)) + geom_bar(stat="identity") + coord_flip()
@@ -142,64 +167,7 @@ Growth in literature over time with any green
 
 We are only counting something as "green" if it's not available in any other format (Gold, hybrid). However, it's also interesting to look at how many articles are being deposited in a repository, regardless of where else they might be open. Let's take a look at that below:
 
-``` r
-gray_green_color_map = scale_fill_manual(values=c("#777777", "#008000", "#FFD700"))
-
-articles_all %>% filter(is_modern) %>% ggplot(aes(x=year, fill=found_green)) + geom_bar(width=1) + gray_green_color_map
-```
-
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-9-1.png) \#\# Proportion of all articles that have been deposited in a repository
-
-``` r
-found_green_freq_by_year = articles_all %>% filter(is_modern) %>% count(year, found_green) %>% 
-  mutate(perc = n / sum(n)) %>% 
-  ungroup()  
-found_green_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=found_green)) + geom_area() + gray_green_color_map
-```
-
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-10-1.png)
-
-Let's look how much different repositories are contributing to the amount of Green OA. (this section very Under Construction still.)
-
-``` r
-articles_all %>% filter(is_modern) %>% ggplot(aes(x=year, fill=evidence)) + geom_bar(width=1)
-```
-
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-11-1.png)
-
-``` r
-articles_all %>% filter(is_modern) %>% mutate(is_green=oa=="green_only")  %>% filter(is_green) %>% filter(grepl('pmcid', evidence)) %>% ggplot(aes(x=year, fill=is_green)) + geom_bar(width=1)
-```
-
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-11-2.png)
-
-``` r
-# citeseerx
-articles_all %>% filter(is_modern) %>% mutate(is_green=oa=="green_only")  %>% filter(is_green) %>% mutate(base_collection_string=as.character(green_base_collections)) %>% filter(grepl('citeseerx', base_collection_string)) %>% ggplot(aes(x=year, fill=is_green)) + geom_bar(width=1)
-```
-
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-11-3.png)
-
-``` r
-# arxiv
-articles_all %>% filter(is_modern) %>% mutate(is_green=oa=="green_only")  %>% filter(is_green) %>% mutate(base_collection_string=as.character(green_base_collections)) %>% filter(grepl('arxiv', base_collection_string)) %>% ggplot(aes(x=year, fill=is_green)) + geom_bar(width=1)
-```
-
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-11-4.png)
-
-``` r
-# pubmed
-articles_all %>% filter(is_modern) %>% mutate(is_green=oa=="green_only")  %>% filter(is_green) %>% mutate(base_collection_string=as.character(green_base_collections)) %>% filter(grepl('pubmed', base_collection_string)) %>% ggplot(aes(x=year, fill=is_green)) + geom_bar(width=1)
-```
-
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-11-5.png)
-
-``` r
-# not citeseerx or arxiv or pubmed
-articles_all %>% filter(is_modern) %>% mutate(is_green=oa=="green_only")  %>% filter(is_green) %>% mutate(base_collection_string=as.character(green_base_collections)) %>% filter(!grepl('citeseerx', base_collection_string), !grepl('arxiv', base_collection_string), !grepl('pubmed', base_collection_string), !grepl('pmcid', evidence)) %>% ggplot(aes(x=year, fill=is_green)) + geom_bar(width=1)
-```
-
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-11-6.png)
+(TBD)
 
 \# By license
 -------------
@@ -210,7 +178,7 @@ What are the most common licenses for open-access papers?
 articles_all %>% filter(is_modern) %>% filter(grepl('cc', license)) %>% ggplot(aes(x=year, fill=license)) + geom_bar(width=1, position="fill") 
 ```
 
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-12-1.png) It looks like there has been steady growth in the number of articles licensed with the CC-BY license, largely at the expense of the CC-BY-NC license.
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-9-1.png) It looks like there has been steady growth in the number of articles licensed with the CC-BY license, largely at the expense of the CC-BY-NC license.
 
 Let's also look at CC licenses by type of OA
 
@@ -218,4 +186,70 @@ Let's also look at CC licenses by type of OA
 articles_all %>% filter(is_modern) %>% filter(oa != "closed", oa != "free") %>% ggplot(aes(x=oa,  fill=license)) + geom_bar(width=1, position="fill") 
 ```
 
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-13-1.png) Most repositories do not note the license of the work, so green\_only is surely an undercount. It's interesting to see that DOAJ journals are more likely to use the more permissive CC-BY license.
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-10-1.png) Most repositories do not note the license of the work, so green\_only is surely an undercount. It's interesting to see that DOAJ journals are more likely to use the more permissive CC-BY license.
+
+\# What are OA percents by most accessed
+----------------------------------------
+
+``` r
+# articles accessed
+articles_accessed_raw <- read.csv("export_study_dois_unpaywall_accesses_20170506.csv")
+articles_accessed = articles_accessed_raw
+articles_accessed = articles_accessed %>%
+  mutate(is_open_license=(grepl("cc", license) | oa_color=="gold"))
+articles_accessed$oa = "closed"
+articles_accessed$oa[articles_accessed$oa_color=="green"] = "green_only"
+articles_accessed$oa[articles_accessed$oa_color=="gold"] = "gold_doaj"
+articles_accessed$oa[articles_accessed$oa_color=="blue" & articles_accessed$is_open_license] = "gold_not_doaj"
+articles_accessed$oa[articles_accessed$oa_color=="blue" & !articles_accessed$is_open_license] = "free"
+
+# sort the factor for easier plotting
+articles_accessed = mutate(articles_accessed, oa=fct_infreq(oa))
+
+# how much oa
+articles_accessed %>% count(oa) %>% mutate(proportion=n/sum(n))
+```
+
+    ## # A tibble: 5 × 3
+    ##              oa     n proportion
+    ##          <fctr> <int>      <dbl>
+    ## 1        closed 17199 0.55752212
+    ## 2          free  4207 0.13637395
+    ## 3     gold_doaj  4108 0.13316477
+    ## 4    green_only  3430 0.11118675
+    ## 5 gold_not_doaj  1905 0.06175241
+
+``` r
+articles_accessed %>% ggplot(aes(x="", fill=oa)) + geom_bar() + oa_color_map
+```
+
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-11-1.png)
+
+``` r
+articles_accessed = articles_accessed %>% mutate(is_modern = year >= 1990 & year <= 2015)
+articles_accessed %>% count(is_modern) %>% mutate(proportion = n / sum(n))
+```
+
+    ## # A tibble: 3 × 3
+    ##   is_modern     n proportion
+    ##       <lgl> <int>      <dbl>
+    ## 1     FALSE 13326 0.43197510
+    ## 2      TRUE 17209 0.55784628
+    ## 3        NA   314 0.01017861
+
+``` r
+articles_accessed %>% filter(is_modern) %>%
+    ggplot(aes(x=year, fill=oa)) + geom_bar(width=1) + oa_color_map
+```
+
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-11-2.png)
+
+``` r
+oa_freq_by_year = articles_accessed %>% filter(is_modern) %>% count(year, oa) %>%  
+  mutate(perc = n / sum(n)) %>%  
+  ungroup()  
+
+oa_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=oa)) + geom_area() + oa_color_map
+```
+
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-11-3.png)

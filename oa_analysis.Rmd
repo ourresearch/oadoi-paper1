@@ -26,12 +26,11 @@ library(jsonlite)
 library(tidyr)
 ```
 
-To do on Saturday night
+To do next
 - make table for amount of oa in last five years, more sentences describing j
 - comment out the single bar graph 1min
 
 - add a bunch more sentences to accessed section
-- 
 - fix labels on accessed section
 
 - put a TBD section for by discipline  1min
@@ -40,6 +39,21 @@ To do on Saturday night
 - say "under construction" for publisher, repos
 
 
+
+
+- describe unpaywall
+- describe userbase of unpaywall
+- the number of calls to the api
+- percent of dois with more than one accesses
+- number of unique IP addresses
+- DOI based analysis
+- we'll include one or two of these graphs, not sure which yet
+- for the most viewed articles, the OA story is better, and getting even better
+
+
+
+decide what to do about
+- 2016 and 2017 are the most accessed years, but leaving them out of analysis
 
 
 if time
@@ -70,14 +84,15 @@ Discussion
 - future work
     - more citation, altmetrics studies
 - expounding on what this means for the future of OA
-
+- take-home
+    - OA isn't evenly distributed, and there is more OA where it is more needed: in recent, highly accessed articles.
 
 
 ```{r get_data, echo=FALSE, cache=TRUE, results='hide'}
 # setwd("~/Dropbox/ti/oadoi-paper")
 
 #### uncomment this on first run of the day
-articles_raw <- read.csv("export_study_hybrid_20170505.csv")
+articles_raw <- read.csv("export_study_hybrid_20170504.csv")
 articles_all = articles_raw
 
 # modify the colors to handle hybrid
