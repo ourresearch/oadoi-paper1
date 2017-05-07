@@ -26,6 +26,31 @@ library(jsonlite)
 library(tidyr)
 ```
 
+To do on Saturday night
+- make table for amount of oa in last five years, more sentences describing j
+- comment out the single bar graph 1min
+
+- add a bunch more sentences to accessed section
+- 
+- fix labels on accessed section
+
+- put a TBD section for by discipline  1min
+- put TBD for "How accurate is our OA detection" and "Do different types of OA have different citation patterns?" 1min
+
+- say "under construction" for publisher, repos
+
+
+
+
+if time
+- fix publisher section
+- repository section needs help
+ 
+
+for later
+- look into why 65mil not 75mil
+- multiply out so get total number of articles
+
 
 Results outline
 - How accurate is our OA detection
@@ -52,7 +77,7 @@ Discussion
 # setwd("~/Dropbox/ti/oadoi-paper")
 
 #### uncomment this on first run of the day
-articles_raw <- read.csv("export_study_hybrid_20170504.csv")
+articles_raw <- read.csv("export_study_hybrid_20170505.csv")
 articles_all = articles_raw
 
 # modify the colors to handle hybrid
@@ -73,6 +98,7 @@ articles_all = mutate(articles_all, oa=fct_infreq(oa))
 
 # handy for color-coding later
 oa_color_map = scale_fill_manual(values=c("#777777", "#2196F3", "#4CAF50", "#FFC107", "#FFEB3B"))
+
 
 
 ```
@@ -96,6 +122,7 @@ oa_color_map = scale_fill_manual(values=c("#777777", "#2196F3", "#4CAF50", "#FFC
 ```{r}
 articles_all %>% count(oa) %>% mutate(proportion=n/sum(n))
 articles_all %>% ggplot(aes(x="", fill=oa)) + geom_bar() + oa_color_map
+
 ```
 * insert definitions of our colors here *
 
@@ -142,6 +169,7 @@ We'll start with plotting absolute numbers of OA articles:
 ```{r}
 articles_all %>% filter(is_modern) %>%
     ggplot(aes(x=year, fill=oa)) + geom_bar(width=1) + oa_color_map
+
 ```
 
 We can see the absolute number of free-to-read articles of all kinds is growing significantly. However, we're particularly interested in the by-year *proportion* of the literature that is free to read.
@@ -153,6 +181,7 @@ oa_freq_by_year = articles_all %>% filter(is_modern) %>% count(year, oa) %>%
   ungroup()  
 
 oa_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=oa)) + geom_area() + oa_color_map
+
 ```
 
 
@@ -198,42 +227,7 @@ coming soon: oa by publisher.
 ## Growth in literature over time with any green
 We are only counting something as "green" if it's not available in any other format (Gold, hybrid). However, it's also interesting to look at how many articles are being deposited in a repository, regardless of where else they might be open. Let's take a look at that below:
 
-```{r}
-gray_green_color_map = scale_fill_manual(values=c("#777777", "#008000", "#FFD700"))
-
-articles_all %>% filter(is_modern) %>% ggplot(aes(x=year, fill=found_green)) + geom_bar(width=1) + gray_green_color_map
-```
-## Proportion of all articles that have been deposited in a repository
-
-```{r}
-found_green_freq_by_year = articles_all %>% filter(is_modern) %>% count(year, found_green) %>% 
-  mutate(perc = n / sum(n)) %>% 
-  ungroup()  
-found_green_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=found_green)) + geom_area() + gray_green_color_map
-```
-
-
-Let's look how much different repositories are contributing to the amount of Green OA. (this section very Under Construction still.)
-
-```{r}
-articles_all %>% filter(is_modern) %>% ggplot(aes(x=year, fill=evidence)) + geom_bar(width=1)
-
-articles_all %>% filter(is_modern) %>% mutate(is_green=oa=="green_only")  %>% filter(is_green) %>% filter(grepl('pmcid', evidence)) %>% ggplot(aes(x=year, fill=is_green)) + geom_bar(width=1)
-
-# citeseerx
-articles_all %>% filter(is_modern) %>% mutate(is_green=oa=="green_only")  %>% filter(is_green) %>% mutate(base_collection_string=as.character(green_base_collections)) %>% filter(grepl('citeseerx', base_collection_string)) %>% ggplot(aes(x=year, fill=is_green)) + geom_bar(width=1)
-
-# arxiv
-articles_all %>% filter(is_modern) %>% mutate(is_green=oa=="green_only")  %>% filter(is_green) %>% mutate(base_collection_string=as.character(green_base_collections)) %>% filter(grepl('arxiv', base_collection_string)) %>% ggplot(aes(x=year, fill=is_green)) + geom_bar(width=1)
-
-# pubmed
-articles_all %>% filter(is_modern) %>% mutate(is_green=oa=="green_only")  %>% filter(is_green) %>% mutate(base_collection_string=as.character(green_base_collections)) %>% filter(grepl('pubmed', base_collection_string)) %>% ggplot(aes(x=year, fill=is_green)) + geom_bar(width=1)
-
-# not citeseerx or arxiv or pubmed
-articles_all %>% filter(is_modern) %>% mutate(is_green=oa=="green_only")  %>% filter(is_green) %>% mutate(base_collection_string=as.character(green_base_collections)) %>% filter(!grepl('citeseerx', base_collection_string), !grepl('arxiv', base_collection_string), !grepl('pubmed', base_collection_string), !grepl('pmcid', evidence)) %>% ggplot(aes(x=year, fill=is_green)) + geom_bar(width=1)
-
-
-```
+(TBD)
 
 
 
@@ -257,3 +251,37 @@ articles_all %>% filter(is_modern) %>% filter(oa != "closed", oa != "free") %>% 
 ```
 Most repositories do not note the license of the work, so green_only is surely an undercount. It's interesting to see that DOAJ journals are more likely to use the more permissive CC-BY license.
 
+# What are OA percents by most accessed
+--------------
+
+```{r}
+# articles accessed
+articles_accessed_raw <- read.csv("export_study_dois_unpaywall_accesses_20170506.csv")
+articles_accessed = articles_accessed_raw
+articles_accessed = articles_accessed %>%
+  mutate(is_open_license=(grepl("cc", license) | oa_color=="gold"))
+articles_accessed$oa = "closed"
+articles_accessed$oa[articles_accessed$oa_color=="green"] = "green_only"
+articles_accessed$oa[articles_accessed$oa_color=="gold"] = "gold_doaj"
+articles_accessed$oa[articles_accessed$oa_color=="blue" & articles_accessed$is_open_license] = "gold_not_doaj"
+articles_accessed$oa[articles_accessed$oa_color=="blue" & !articles_accessed$is_open_license] = "free"
+
+# sort the factor for easier plotting
+articles_accessed = mutate(articles_accessed, oa=fct_infreq(oa))
+
+# how much oa
+articles_accessed %>% count(oa) %>% mutate(proportion=n/sum(n))
+articles_accessed %>% ggplot(aes(x="", fill=oa)) + geom_bar() + oa_color_map
+
+articles_accessed = articles_accessed %>% mutate(is_modern = year >= 1990 & year <= 2015)
+articles_accessed %>% count(is_modern) %>% mutate(proportion = n / sum(n))
+
+articles_accessed %>% filter(is_modern) %>%
+    ggplot(aes(x=year, fill=oa)) + geom_bar(width=1) + oa_color_map
+
+oa_freq_by_year = articles_accessed %>% filter(is_modern) %>% count(year, oa) %>%  
+  mutate(perc = n / sum(n)) %>%  
+  ungroup()  
+
+oa_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=oa)) + geom_area() + oa_color_map
+```
