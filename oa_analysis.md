@@ -18,14 +18,15 @@ put juan's stuff here.
 articles_all %>% count(oa) %>% mutate(proportion=n/sum(n))
 ```
 
-    ## # A tibble: 5 × 3
-    ##              oa     n proportion
-    ##          <fctr> <int>      <dbl>
-    ## 1        closed 76758 0.76877160
-    ## 2          free 11300 0.11317542
-    ## 3    green_only  6293 0.06302769
-    ## 4     gold_doaj  3559 0.03564525
-    ## 5 gold_not_doaj  1935 0.01938004
+    ## # A tibble: 6 × 3
+    ##            oa     n  proportion
+    ##        <fctr> <int>       <dbl>
+    ## 1      closed 73493 0.736070910
+    ## 2   gold_free 13058 0.130782713
+    ## 3 gold_hybrid  4092 0.040983524
+    ## 4   gold_doaj  3411 0.034162953
+    ## 5  green_only  5499 0.055075367
+    ## 6          NA   292 0.002924533
 
 Category definitions:
 
@@ -52,8 +53,8 @@ articles_all %>% group_by(year <= 2017 & year >= 1500) %>% summarise(n())
     ##   `year <= 2017 & year >= 1500` `n()`
     ##                           <lgl> <int>
     ## 1                         FALSE     4
-    ## 2                          TRUE 99142
-    ## 3                            NA   699
+    ## 2                          TRUE 99280
+    ## 3                            NA   561
 
 It seems the year data is pretty good, with less than 0.1% missing or obviously wrong years. We don't really want to look at data since 1500, so let's see what's a reasonable window to examine. We'll try 1990 because it's comfortably before the "modern era" of open access.
 
@@ -76,9 +77,9 @@ articles_all %>% count(is_modern) %>% mutate(proportion = n / sum(n))
     ## # A tibble: 3 × 3
     ##   is_modern     n  proportion
     ##       <lgl> <int>       <dbl>
-    ## 1     FALSE 34478 0.345315239
-    ## 2      TRUE 64668 0.647683910
-    ## 3        NA   699 0.007000851
+    ## 1     FALSE 34518 0.345715860
+    ## 2      TRUE 64766 0.648665431
+    ## 3        NA   561 0.005618709
 
 This subset will still cover nearly two thirds of all DOIs ever, while letting us zoom in on the years of interest.
 
@@ -123,7 +124,7 @@ publishers = articles_recent %>% count(publisher) %>%
 sum(publishers$n[0:100]) /sum(publishers$n)
 ```
 
-    ## [1] 0.8347604
+    ## [1] 0.8347942
 
 ``` r
 #publishers %>% slice(1:25) %>% ggplot(aes(x=publisher, y=n)) + geom_bar(stat="identity") + coord_flip()
@@ -144,7 +145,7 @@ publishers_oa %>% slice(1:80) %>% ggplot(aes(x=publisher, y=n, fill=oa)) +
 ``` r
 #same thing but by % oa
 
-publishers_oa %>% slice(1:80) %>% ggplot(aes(x=publisher, y=n, fill=oa)) + 
+publishers_oa %>% slice(1:120) %>% ggplot(aes(x=publisher, y=n, fill=oa)) + 
   geom_bar(stat="identity", position="fill") + 
   coord_flip() +
   oa_color_map
@@ -208,9 +209,9 @@ articles_all %>% filter(year > 2009, oa=="green_only") %>% count(repo) %>% mutat
     ## # A tibble: 3 × 3
     ##     repo     n proportion
     ##   <fctr> <int>      <dbl>
-    ## 1    PMC  1170  0.4277879
-    ## 2  other  1156  0.4226691
-    ## 3  arXiv   409  0.1495430
+    ## 1    PMC   939   0.395535
+    ## 2  other  1061   0.446925
+    ## 3  arXiv   374   0.157540
 
 That said, smaller repositories are still making a significant contribution to Green OA, particularly in recent years. for articles published since 2009, the contribute about as much as PMC (42%).
 

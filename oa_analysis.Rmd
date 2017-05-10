@@ -45,7 +45,7 @@ Results outline so far:
 # setwd("~/Dropbox/ti/oadoi-paper")
 
 #### uncomment this on first run of the day
-articles_raw <- read.csv("export_study_hybrid_20170504.csv")
+articles_raw <- read.csv("export_study2_20170509.csv")
 articles_all = articles_raw
 
 # modify the colors to handle hybrid
@@ -55,17 +55,20 @@ articles_all = articles_all %>%
 # there is an artifact in the data caused by this "publisher." remove.
 articles_all = articles_all %>% filter(publisher != "CrossRef Test Account")
 
-articles_all$oa = "closed"
-articles_all$oa[articles_all$oa_color=="green"] = "green_only"
-articles_all$oa[articles_all$oa_color=="gold"] = "gold_doaj"
-articles_all$oa[articles_all$oa_color=="blue" & articles_all$is_open_license] = "gold_not_doaj"
-articles_all$oa[articles_all$oa_color=="blue" & !articles_all$is_open_license] = "free"
+articles_all$oa_orig = "closed"
+articles_all$oa_orig[articles_all$oa_color=="green"] = "green_only"
+articles_all$oa_orig[articles_all$oa_color=="gold"] = "gold_doaj"
+articles_all$oa_orig[articles_all$oa_color=="blue" & articles_all$is_open_license] = "gold_not_doaj"
+articles_all$oa_orig[articles_all$oa_color=="blue" & !articles_all$is_open_license] = "free"
+
+articles_all$oa = articles_all$oa_color_long
 
 # sort the factor for easier plotting
-articles_all = mutate(articles_all, oa=fct_infreq(oa))
+oa_ordered_levels = c("closed", "gold_free", "gold_hybrid", "gold_doaj", "green_only")
+articles_all = mutate(articles_all, oa=factor(oa, levels=oa_ordered_levels))
 
 # handy for color-coding later
-oa_color_map = scale_fill_manual(values=c("#777777", "#2196F3", "#4CAF50", "#FFC107", "#FFEB3B"))
+oa_color_map = scale_fill_manual(values=c("#777777", "#FFEB3B", "#FFC107", "#FFA107", "#4CAF50"))
 
 
 
@@ -147,6 +150,7 @@ This subset will still cover nearly two thirds of all DOIs ever, while letting u
 
 We'll start with plotting absolute numbers of OA articles:
 ```{r}
+
 articles_all %>% filter(is_modern) %>%
     ggplot(aes(x=year, fill=oa)) + geom_bar(width=1) + oa_color_map
 
@@ -205,7 +209,7 @@ publishers_oa %>% slice(1:80) %>% ggplot(aes(x=publisher, y=n, fill=oa)) +
 
 #same thing but by % oa
 
-publishers_oa %>% slice(1:80) %>% ggplot(aes(x=publisher, y=n, fill=oa)) + 
+publishers_oa %>% slice(1:120) %>% ggplot(aes(x=publisher, y=n, fill=oa)) + 
   geom_bar(stat="identity", position="fill") + 
   coord_flip() +
   oa_color_map
