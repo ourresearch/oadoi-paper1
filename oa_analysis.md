@@ -134,7 +134,7 @@ publishers_oa = articles_recent %>%
   ungroup()
 
 
-publishers_oa %>% slice(1:80) %>% ggplot(aes(x=publisher, y=n, fill=oa)) + 
+publishers_oa %>% slice(1:80) %>% mutate(publisher_rev=fct_rev(publisher)) %>% ggplot(aes(x=publisher_rev, y=n, fill=oa)) + 
   geom_bar(stat="identity") + 
   coord_flip() +
   oa_color_map
@@ -145,7 +145,7 @@ publishers_oa %>% slice(1:80) %>% ggplot(aes(x=publisher, y=n, fill=oa)) +
 ``` r
 #same thing but by % oa
 
-publishers_oa %>% slice(1:120) %>% ggplot(aes(x=publisher, y=n, fill=oa)) + 
+publishers_oa %>% slice(1:80) %>% mutate(publisher_rev=fct_rev(publisher)) %>% ggplot(aes(x=publisher_rev, y=n, fill=oa)) + 
   geom_bar(stat="identity", position="fill") + 
   coord_flip() +
   oa_color_map
@@ -157,28 +157,6 @@ From this we can see that Elsevier is massively outpublishing anyone else. Becau
 
 \# Repositories
 ===============
-
-Growth in literature over time with any green
----------------------------------------------
-
-We are only counting something as "green" if it's not available in any other format (Gold, hybrid). However, it's also interesting to look at how many articles are available in a repository, regardless of where else they might be open. Let's take a look at that below:
-
-``` r
-gray_green_color_map = scale_fill_manual(values=c("#777777", "#008000", "#FFD700"))
-
-articles_all %>% filter(is_modern) %>% ggplot(aes(x=year, fill=found_green)) + geom_bar(width=1) + gray_green_color_map
-```
-
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-8-1.png) As a proportion of all articles, deposits into repositories has been going up, with a recent drop. Embargos probaby play a large part in this, though deposit into places like ResearchGate (not included in our repository numbers) rather than institutional repositories may as well.
-
-``` r
-found_green_freq_by_year = articles_all %>% filter(is_modern) %>% count(year, found_green) %>%
-  mutate(perc = n / sum(n)) %>%
-  ungroup()
-found_green_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=found_green)) + geom_area() + gray_green_color_map
-```
-
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-9-1.png)
 
 A different question is to dig into which repositories are contributing to making papers available. We know that PubMed Central and the ArXiv are both very popular repositories, so we will plot them seperately. We'll combine all other repositories, including the thousands of institutional repositories, into a single category for now. As a reminder, we are only looking here at articles that are *only* available from a green repository.
 
@@ -193,12 +171,15 @@ articles_all$repo[grepl('pmcid', articles_all$evidence)] = "PMC"
 articles_all$repo[grepl('pubmed', articles_all$base_collection_string)] = "PMC"
 articles_all$repo[grepl('arxiv', articles_all$base_collection_string)] = "arXiv"
 
-articles_all = mutate(articles_all, repo=fct_infreq(repo))
+repo_ordered_levels = c("PMC", "arXiv", "other")
+articles_all = mutate(articles_all, repo=factor(repo, levels=repo_ordered_levels))
 
-articles_all %>% filter(is_modern) %>% filter(!is.na(repo)) %>% ggplot(aes(x=year, fill=repo)) + geom_bar(width=1)
+repo_color_map = scale_fill_manual(values=c("purple", "blue", "dark blue"))
+
+articles_all %>% filter(is_modern) %>% filter(!is.na(repo)) %>% ggplot(aes(x=year, fill=repo)) + geom_bar(width=1) + repo_color_map
 ```
 
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-10-1.png)
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-8-1.png)
 
 Again, it apprears that multi-year embargoes maybe affecting PMC. Regardless of this, PMC remains by far the most significant green repository, and a very important source of fulltext that would be otherwise unavailable.
 
@@ -210,10 +191,32 @@ articles_all %>% filter(year > 2009, oa=="green_only") %>% count(repo) %>% mutat
     ##     repo     n proportion
     ##   <fctr> <int>      <dbl>
     ## 1    PMC   939   0.395535
-    ## 2  other  1061   0.446925
-    ## 3  arXiv   374   0.157540
+    ## 2  arXiv   374   0.157540
+    ## 3  other  1061   0.446925
 
 That said, smaller repositories are still making a significant contribution to Green OA, particularly in recent years. for articles published since 2009, the contribute about as much as PMC (42%).
+
+Growth in literature over time with any green
+---------------------------------------------
+
+We are only counting something as "green" if it's not available in any other format (Gold, hybrid). However, it's also interesting to look at how many articles are available in a repository, regardless of where else they might be open. Let's take a look at that below:
+
+``` r
+gray_green_color_map = scale_fill_manual(values=c("#777777", "#008000", "#FFD700"))
+
+articles_all %>% filter(is_modern) %>% ggplot(aes(x=year, fill=found_green)) + geom_bar(width=1) + gray_green_color_map
+```
+
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-10-1.png) As a proportion of all articles, deposits into repositories has been going up, with a recent drop. Embargos probaby play a large part in this, though deposit into places like ResearchGate (not included in our repository numbers) rather than institutional repositories may as well.
+
+``` r
+found_green_freq_by_year = articles_all %>% filter(is_modern) %>% count(year, found_green) %>%
+  mutate(perc = n / sum(n)) %>%
+  ungroup()
+found_green_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=found_green)) + geom_area() + gray_green_color_map
+```
+
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-11-1.png)
 
 \# By license
 =============
@@ -229,10 +232,10 @@ articles_all %>% filter(is_modern) %>% filter(grepl('cc', license)) %>% ggplot(a
 Let's also look at CC licenses by type of OA
 
 ``` r
-articles_all %>% filter(is_modern) %>% filter(oa != "closed", oa != "free") %>% ggplot(aes(x=oa,  fill=license)) + geom_bar(width=1, position="fill") 
+# articles_all %>% filter(is_modern) %>% filter(oa != "closed", oa != "free") %>% ggplot(aes(x=oa,  fill=license)) + geom_bar(width=1, position="fill") 
 ```
 
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-13-1.png) Most repositories do not note the license of the work, so green\_only is surely an undercount. It's interesting to see that DOAJ journals are more likely to use the more permissive CC-BY license. This graph needs different colors, so that license=NA is shown as gray.
+Most repositories do not note the license of the work, so green\_only is surely an undercount. It's interesting to see that DOAJ journals are more likely to use the more permissive CC-BY license. This graph needs different colors, so that license=NA is shown as gray.
 
 \# By discipline
 ================
@@ -248,67 +251,36 @@ To write: - describe unpaywall - describe userbase of unpaywall - the number of 
 
 ``` r
 # articles accessed
-articles_accessed_raw <- read.csv("export_study_dois_unpaywall_accesses_20170506.csv")
-articles_accessed = articles_accessed_raw
-articles_accessed = articles_accessed %>%
-  mutate(is_open_license=(grepl("cc", license) | oa_color=="gold"))
-articles_accessed$oa = "closed"
-articles_accessed$oa[articles_accessed$oa_color=="green"] = "green_only"
-articles_accessed$oa[articles_accessed$oa_color=="gold"] = "gold_doaj"
-articles_accessed$oa[articles_accessed$oa_color=="blue" & articles_accessed$is_open_license] = "gold_not_doaj"
-articles_accessed$oa[articles_accessed$oa_color=="blue" & !articles_accessed$is_open_license] = "free"
-
-# sort the factor for easier plotting
-oa_color_map_accessed = scale_fill_manual(values=c("#777777", "#2196F3", "#FFC107", "#4CAF50", "#FFEB3B"))
-articles_accessed = mutate(articles_accessed, oa=fct_infreq(oa))
-
-# how much oa
-articles_accessed %>% count(oa) %>% mutate(proportion=n/sum(n))
+# articles_accessed_raw <- read.csv("export_study_dois_unpaywall_accesses_20170506.csv")
+# articles_accessed = articles_accessed_raw
+# articles_accessed = articles_accessed %>%
+#   mutate(is_open_license=(grepl("cc", license) | oa_color=="gold"))
+# articles_accessed$oa = "closed"
+# articles_accessed$oa[articles_accessed$oa_color=="green"] = "green_only"
+# articles_accessed$oa[articles_accessed$oa_color=="gold"] = "gold_doaj"
+# articles_accessed$oa[articles_accessed$oa_color=="blue" & articles_accessed$is_open_license] = "gold_not_doaj"
+# articles_accessed$oa[articles_accessed$oa_color=="blue" & !articles_accessed$is_open_license] = "free"
+# 
+# # sort the factor for easier plotting
+# oa_color_map_accessed = scale_fill_manual(values=c("#777777", "#2196F3", "#FFC107", "#4CAF50", "#FFEB3B"))
+# articles_accessed = mutate(articles_accessed, oa=fct_infreq(oa))
+# 
+# # how much oa
+# articles_accessed %>% count(oa) %>% mutate(proportion=n/sum(n))
+# articles_accessed %>% ggplot(aes(x="", fill=oa)) + geom_bar() + oa_color_map_accessed
+# 
+# articles_accessed = articles_accessed %>% mutate(is_modern = year >= 1990 & year <= 2015)
+# articles_accessed %>% count(is_modern) %>% mutate(proportion = n / sum(n))
+# 
+# articles_accessed %>% filter(is_modern) %>%
+#     ggplot(aes(x=year, fill=oa)) + geom_bar(width=1) + oa_color_map_accessed
+# 
+# oa_freq_by_year = articles_accessed %>% filter(is_modern) %>% count(year, oa) %>%  
+#   mutate(perc = n / sum(n)) %>%  
+#   ungroup()  
+# 
+# oa_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=oa)) + geom_area() + oa_color_map_accessed
 ```
-
-    ## # A tibble: 5 × 3
-    ##              oa     n proportion
-    ##          <fctr> <int>      <dbl>
-    ## 1        closed 17199 0.55752212
-    ## 2          free  4207 0.13637395
-    ## 3     gold_doaj  4108 0.13316477
-    ## 4    green_only  3430 0.11118675
-    ## 5 gold_not_doaj  1905 0.06175241
-
-``` r
-articles_accessed %>% ggplot(aes(x="", fill=oa)) + geom_bar() + oa_color_map_accessed
-```
-
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-14-1.png)
-
-``` r
-articles_accessed = articles_accessed %>% mutate(is_modern = year >= 1990 & year <= 2015)
-articles_accessed %>% count(is_modern) %>% mutate(proportion = n / sum(n))
-```
-
-    ## # A tibble: 3 × 3
-    ##   is_modern     n proportion
-    ##       <lgl> <int>      <dbl>
-    ## 1     FALSE 13326 0.43197510
-    ## 2      TRUE 17209 0.55784628
-    ## 3        NA   314 0.01017861
-
-``` r
-articles_accessed %>% filter(is_modern) %>%
-    ggplot(aes(x=year, fill=oa)) + geom_bar(width=1) + oa_color_map_accessed
-```
-
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-14-2.png)
-
-``` r
-oa_freq_by_year = articles_accessed %>% filter(is_modern) %>% count(year, oa) %>%  
-  mutate(perc = n / sum(n)) %>%  
-  ungroup()  
-
-oa_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=oa)) + geom_area() + oa_color_map_accessed
-```
-
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-14-3.png)
 
 \# OA and citation patterns
 ===========================
