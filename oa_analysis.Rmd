@@ -45,7 +45,7 @@ Results outline so far:
 # setwd("~/Dropbox/ti/oadoi-paper")
 
 #### uncomment this on first run of the day
-articles_raw <- read.csv("export_study2_20170509.csv")
+# articles_raw <- read.csv("export_study2_20170509.csv")
 articles_all = articles_raw
 
 # modify the colors to handle hybrid
@@ -66,9 +66,10 @@ articles_all$oa = articles_all$oa_color_long
 # sort the factor for easier plotting
 oa_ordered_levels = c("closed", "gold_free", "gold_hybrid", "gold_doaj", "green_only")
 articles_all = mutate(articles_all, oa=factor(oa, levels=oa_ordered_levels))
+articles_all = articles_all %>% filter(!is.na(oa))
 
 # handy for color-coding later
-oa_color_map = scale_fill_manual(values=c("#777777", "#FFEB3B", "#FFC107", "#FFA107", "#4CAF50"))
+oa_color_map = scale_fill_manual(values=c("#777777", "#FFF59D", "#FFC107", "#FFA107", "#4CAF50"))
 
 
 
@@ -164,6 +165,8 @@ oa_freq_by_year = articles_all %>% filter(is_modern) %>% count(year, oa) %>%
   mutate(perc = n / sum(n)) %>%  
   ungroup()  
 
+oa_color_map = scale_fill_manual(values=c("#777777", "#ffdc3b", "#FFC107", "#FF9800", "#4CAF50"))
+
 oa_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=oa)) + geom_area() + oa_color_map
 
 ```
@@ -202,14 +205,14 @@ publishers_oa = articles_recent %>%
   ungroup()
 
 
-publishers_oa %>% slice(1:80) %>% ggplot(aes(x=publisher, y=n, fill=oa)) + 
+publishers_oa %>% slice(1:90) %>% ggplot(aes(x=publisher, y=n, fill=oa)) + 
   geom_bar(stat="identity") + 
   coord_flip() +
   oa_color_map
 
 #same thing but by % oa
 
-publishers_oa %>% slice(1:120) %>% ggplot(aes(x=publisher, y=n, fill=oa)) + 
+publishers_oa %>% slice(1:90) %>% ggplot(aes(x=publisher, y=n, fill=oa)) + 
   geom_bar(stat="identity", position="fill") + 
   coord_flip() +
   oa_color_map
