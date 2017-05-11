@@ -250,37 +250,58 @@ DOIs accessed through Unpaywall on April 20, 2017. 50k accesses, 30k unique DOIs
 To write: - describe unpaywall - describe userbase of unpaywall - the number of calls to the api - percent of dois with more than one accesses - number of unique IP addresses - DOI based analysis - we'll include one or two of these graphs, not sure which yet - for the most viewed articles, the OA story is better, and getting even better
 
 ``` r
-# articles accessed
-# articles_accessed_raw <- read.csv("export_study_dois_unpaywall_accesses_20170506.csv")
-# articles_accessed = articles_accessed_raw
-# articles_accessed = articles_accessed %>%
-#   mutate(is_open_license=(grepl("cc", license) | oa_color=="gold"))
-# articles_accessed$oa = "closed"
-# articles_accessed$oa[articles_accessed$oa_color=="green"] = "green_only"
-# articles_accessed$oa[articles_accessed$oa_color=="gold"] = "gold_doaj"
-# articles_accessed$oa[articles_accessed$oa_color=="blue" & articles_accessed$is_open_license] = "gold_not_doaj"
-# articles_accessed$oa[articles_accessed$oa_color=="blue" & !articles_accessed$is_open_license] = "free"
-# 
-# # sort the factor for easier plotting
-# oa_color_map_accessed = scale_fill_manual(values=c("#777777", "#2196F3", "#FFC107", "#4CAF50", "#FFEB3B"))
-# articles_accessed = mutate(articles_accessed, oa=fct_infreq(oa))
-# 
-# # how much oa
-# articles_accessed %>% count(oa) %>% mutate(proportion=n/sum(n))
-# articles_accessed %>% ggplot(aes(x="", fill=oa)) + geom_bar() + oa_color_map_accessed
-# 
-# articles_accessed = articles_accessed %>% mutate(is_modern = year >= 1990 & year <= 2015)
-# articles_accessed %>% count(is_modern) %>% mutate(proportion = n / sum(n))
-# 
-# articles_accessed %>% filter(is_modern) %>%
-#     ggplot(aes(x=year, fill=oa)) + geom_bar(width=1) + oa_color_map_accessed
-# 
-# oa_freq_by_year = articles_accessed %>% filter(is_modern) %>% count(year, oa) %>%  
-#   mutate(perc = n / sum(n)) %>%  
-#   ungroup()  
-# 
-# oa_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=oa)) + geom_area() + oa_color_map_accessed
+articles_accessed_raw <- read.csv("export_study_dois_unpaywall_accesses_20170511.csv")
+articles_accessed = articles_accessed_raw
+articles_accessed = mutate(articles_accessed, oa=factor(oa_color_long, levels=oa_ordered_levels))
+
+# how much oa
+articles_accessed %>% count(oa) %>% mutate(proportion=n/sum(n))
 ```
+
+    ## # A tibble: 6 × 3
+    ##            oa     n  proportion
+    ##        <fctr> <int>       <dbl>
+    ## 1      closed 26714 0.563622170
+    ## 2   gold_free  5683 0.119902104
+    ## 3 gold_hybrid  3616 0.076291748
+    ## 4   gold_doaj  5917 0.124839125
+    ## 5  green_only  5372 0.113340507
+    ## 6          NA    95 0.002004346
+
+``` r
+articles_accessed %>% ggplot(aes(x="", fill=oa)) + geom_bar() + oa_color_map
+```
+
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-14-1.png)
+
+``` r
+articles_accessed = articles_accessed %>% mutate(is_modern = year >= 1990 & year <= 2015)
+articles_accessed %>% count(is_modern) %>% mutate(proportion = n / sum(n))
+```
+
+    ## # A tibble: 3 × 3
+    ##   is_modern     n proportion
+    ##       <lgl> <int>      <dbl>
+    ## 1     FALSE 20032 0.42264278
+    ## 2      TRUE 26801 0.56545773
+    ## 3        NA   564 0.01189949
+
+``` r
+articles_accessed %>% filter(is_modern) %>%
+    ggplot(aes(x=year, fill=oa)) + geom_bar(width=1) + oa_color_map
+```
+
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-14-2.png)
+
+``` r
+oa_freq_by_year = articles_accessed %>% filter(is_modern) %>% count(year, oa) %>%
+  mutate(perc = n / sum(n)) %>%
+  ungroup()
+
+oa_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=oa)) + geom_area() + oa_color_map
+```
+
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-14-3.png)
 
 \# OA and citation patterns
 ===========================
