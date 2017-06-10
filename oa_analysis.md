@@ -19,14 +19,14 @@ articles_all %>% count(oa) %>% mutate(proportion=n/sum(n))
 ```
 
     ## # A tibble: 6 × 3
-    ##            oa     n  proportion
-    ##        <fctr> <int>       <dbl>
-    ## 1      closed 73493 0.736070910
-    ## 2   gold_free 13058 0.130782713
-    ## 3 gold_hybrid  4092 0.040983524
-    ## 4   gold_doaj  3411 0.034162953
-    ## 5  green_only  5499 0.055075367
-    ## 6          NA   292 0.002924533
+    ##            oa     n   proportion
+    ##        <fctr> <int>        <dbl>
+    ## 1      closed 72029 0.7214081827
+    ## 2   gold_free 16202 0.1622715209
+    ## 3 gold_hybrid  3586 0.0359156693
+    ## 4   gold_doaj  3183 0.0318794131
+    ## 5  green_only  4816 0.0482347639
+    ## 6          NA    29 0.0002904502
 
 Category definitions:
 
@@ -53,8 +53,8 @@ articles_all %>% group_by(year <= 2017 & year >= 1500) %>% summarise(n())
     ##   `year <= 2017 & year >= 1500` `n()`
     ##                           <lgl> <int>
     ## 1                         FALSE     4
-    ## 2                          TRUE 99280
-    ## 3                            NA   561
+    ## 2                          TRUE 99411
+    ## 3                            NA   430
 
 It seems the year data is pretty good, with less than 0.1% missing or obviously wrong years. We don't really want to look at data since 1500, so let's see what's a reasonable window to examine. We'll try 1990 because it's comfortably before the "modern era" of open access.
 
@@ -77,9 +77,9 @@ articles_all %>% count(is_modern) %>% mutate(proportion = n / sum(n))
     ## # A tibble: 3 × 3
     ##   is_modern     n  proportion
     ##       <lgl> <int>       <dbl>
-    ## 1     FALSE 34518 0.345715860
-    ## 2      TRUE 64766 0.648665431
-    ## 3        NA   561 0.005618709
+    ## 1     FALSE 34559 0.346126496
+    ## 2      TRUE 64856 0.649566829
+    ## 3        NA   430 0.004306675
 
 This subset will still cover nearly two thirds of all DOIs ever, while letting us zoom in on the years of interest.
 
@@ -124,7 +124,7 @@ publishers = articles_recent %>% count(publisher) %>%
 sum(publishers$n[0:100]) /sum(publishers$n)
 ```
 
-    ## [1] 0.8347942
+    ## [1] 0.8346847
 
 ``` r
 #publishers %>% slice(1:25) %>% ggplot(aes(x=publisher, y=n)) + geom_bar(stat="identity") + coord_flip()
@@ -187,12 +187,11 @@ Again, it apprears that multi-year embargoes maybe affecting PMC. Regardless of 
 articles_all %>% filter(year > 2009, oa=="green_only") %>% count(repo) %>% mutate(proportion=n/sum(n))
 ```
 
-    ## # A tibble: 3 × 3
+    ## # A tibble: 2 × 3
     ##     repo     n proportion
     ##   <fctr> <int>      <dbl>
-    ## 1    PMC   939   0.395535
-    ## 2  arXiv   374   0.157540
-    ## 3  other  1061   0.446925
+    ## 1    PMC   723  0.3763665
+    ## 2  other  1198  0.6236335
 
 That said, smaller repositories are still making a significant contribution to Green OA, particularly in recent years. for articles published since 2009, the contribute about as much as PMC (42%).
 
@@ -250,58 +249,26 @@ DOIs accessed through Unpaywall on April 20, 2017. 50k accesses, 30k unique DOIs
 To write: - describe unpaywall - describe userbase of unpaywall - the number of calls to the api - percent of dois with more than one accesses - number of unique IP addresses - DOI based analysis - we'll include one or two of these graphs, not sure which yet - for the most viewed articles, the OA story is better, and getting even better
 
 ``` r
-articles_accessed_raw <- read.csv("export_study_dois_unpaywall_accesses_20170511.csv")
-articles_accessed = articles_accessed_raw
-articles_accessed = mutate(articles_accessed, oa=factor(oa_color_long, levels=oa_ordered_levels))
-
-# how much oa
-articles_accessed %>% count(oa) %>% mutate(proportion=n/sum(n))
+# articles_accessed_raw <- read.csv("export_study_dois_unpaywall_accesses_20170511.csv")
+# articles_accessed = articles_accessed_raw
+# articles_accessed = mutate(articles_accessed, oa=factor(oa_color_long, levels=oa_ordered_levels))
+# 
+# # how much oa
+# articles_accessed %>% count(oa) %>% mutate(proportion=n/sum(n))
+# articles_accessed %>% ggplot(aes(x="", fill=oa)) + geom_bar() + oa_color_map
+# 
+# articles_accessed = articles_accessed %>% mutate(is_modern = year >= 1990 & year <= 2015)
+# articles_accessed %>% count(is_modern) %>% mutate(proportion = n / sum(n))
+# 
+# articles_accessed %>% filter(is_modern) %>%
+#     ggplot(aes(x=year, fill=oa)) + geom_bar(width=1) + oa_color_map
+# 
+# oa_freq_by_year = articles_accessed %>% filter(is_modern) %>% count(year, oa) %>%
+#   mutate(perc = n / sum(n)) %>%
+#   ungroup()
+# 
+# oa_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=oa)) + geom_area() + oa_color_map
 ```
-
-    ## # A tibble: 6 × 3
-    ##            oa     n  proportion
-    ##        <fctr> <int>       <dbl>
-    ## 1      closed 26714 0.563622170
-    ## 2   gold_free  5683 0.119902104
-    ## 3 gold_hybrid  3616 0.076291748
-    ## 4   gold_doaj  5917 0.124839125
-    ## 5  green_only  5372 0.113340507
-    ## 6          NA    95 0.002004346
-
-``` r
-articles_accessed %>% ggplot(aes(x="", fill=oa)) + geom_bar() + oa_color_map
-```
-
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-14-1.png)
-
-``` r
-articles_accessed = articles_accessed %>% mutate(is_modern = year >= 1990 & year <= 2015)
-articles_accessed %>% count(is_modern) %>% mutate(proportion = n / sum(n))
-```
-
-    ## # A tibble: 3 × 3
-    ##   is_modern     n proportion
-    ##       <lgl> <int>      <dbl>
-    ## 1     FALSE 20032 0.42264278
-    ## 2      TRUE 26801 0.56545773
-    ## 3        NA   564 0.01189949
-
-``` r
-articles_accessed %>% filter(is_modern) %>%
-    ggplot(aes(x=year, fill=oa)) + geom_bar(width=1) + oa_color_map
-```
-
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-14-2.png)
-
-``` r
-oa_freq_by_year = articles_accessed %>% filter(is_modern) %>% count(year, oa) %>%
-  mutate(perc = n / sum(n)) %>%
-  ungroup()
-
-oa_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=oa)) + geom_area() + oa_color_map
-```
-
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-14-3.png)
 
 \# OA and citation patterns
 ===========================

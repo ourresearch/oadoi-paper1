@@ -45,7 +45,7 @@ Results outline so far:
 # setwd("~/Dropbox/ti/oadoi-paper")
 
 #### uncomment this on first run of the day
-articles_raw <- read.csv("export_study2_20170509.csv")
+articles_raw <- read.csv("export_study_main_100k.csv")
 articles_all = articles_raw
 
 # modify the colors to handle hybrid
@@ -329,25 +329,25 @@ To write:
 
 
 ```{r}
-articles_accessed_raw <- read.csv("export_study_dois_unpaywall_accesses_20170511.csv")
-articles_accessed = articles_accessed_raw
-articles_accessed = mutate(articles_accessed, oa=factor(oa_color_long, levels=oa_ordered_levels))
-
-# how much oa
-articles_accessed %>% count(oa) %>% mutate(proportion=n/sum(n))
-articles_accessed %>% ggplot(aes(x="", fill=oa)) + geom_bar() + oa_color_map
-
-articles_accessed = articles_accessed %>% mutate(is_modern = year >= 1990 & year <= 2015)
-articles_accessed %>% count(is_modern) %>% mutate(proportion = n / sum(n))
-
-articles_accessed %>% filter(is_modern) %>%
-    ggplot(aes(x=year, fill=oa)) + geom_bar(width=1) + oa_color_map
-
-oa_freq_by_year = articles_accessed %>% filter(is_modern) %>% count(year, oa) %>%
-  mutate(perc = n / sum(n)) %>%
-  ungroup()
-
-oa_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=oa)) + geom_area() + oa_color_map
+# articles_accessed_raw <- read.csv("export_study_dois_unpaywall_accesses_20170511.csv")
+# articles_accessed = articles_accessed_raw
+# articles_accessed = mutate(articles_accessed, oa=factor(oa_color_long, levels=oa_ordered_levels))
+# 
+# # how much oa
+# articles_accessed %>% count(oa) %>% mutate(proportion=n/sum(n))
+# articles_accessed %>% ggplot(aes(x="", fill=oa)) + geom_bar() + oa_color_map
+# 
+# articles_accessed = articles_accessed %>% mutate(is_modern = year >= 1990 & year <= 2015)
+# articles_accessed %>% count(is_modern) %>% mutate(proportion = n / sum(n))
+# 
+# articles_accessed %>% filter(is_modern) %>%
+#     ggplot(aes(x=year, fill=oa)) + geom_bar(width=1) + oa_color_map
+# 
+# oa_freq_by_year = articles_accessed %>% filter(is_modern) %>% count(year, oa) %>%
+#   mutate(perc = n / sum(n)) %>%
+#   ungroup()
+# 
+# oa_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=oa)) + geom_area() + oa_color_map
 ```
 
 
