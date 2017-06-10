@@ -37,7 +37,7 @@ Category definitions:
 -   *green\_only*: The article is Green OA. We couldn't find any free copy on the publisher page, but we did find one in a repository. Note: this category is for copies that are *only* available in the repository, nowhere else. 
 -   *NA*: Processing error of som kind...we'll fix these before publication
 
-So, about 23% of the DOI-assigned literature is available to read. Given that we’re sampling from 65,838,767 total journal articles with a Crossref DOI, that means we can estimate there are *at least* 65838767 \* 0.232 = 15274594 free-to-read articles (15.2 million).
+So, about 23% of the DOI-assigned literature is available to read. Given that we’re sampling from 65,838,767 total journal articles with a Crossref DOI, that means we can estimate there are *at least* 65838767 \* 0.232 = 15274594 free-to-read articles (15.2 million) with Crossref DOIs.
 
 But we know that in recent years OA has been gaining steam, so let's let's look more closely at OA over time.
 
@@ -106,12 +106,12 @@ oa_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=oa)) + geom_area() + oa_colo
 
 ![](oa_analysis_files/figure-markdown_github/unnamed-chunk-6-1.png)
 
-The proportion of OA is growing, too--not just the absolute amounts.
+The proportion of OA is growing, too--not just the absolute amounts. This is driven the three Gold categories, all three of which are increasing over time. The percentage of Green Only OA is showing modest declines. Note that this doesn't necessarily reflect the number of papers actually being deposited, since this category is for papers available *only* in a repository. Gold-and-green articles are categorized as Gold. This means that growth in Gold may be disguising growth in the percentage of self-archived papers. We'll look more into this possibility further below. For now, thought, we turn to publishers.
 
 \# Publishers
 =============
 
-Let's look at publishers. We'll subset the years more tightly and just look at articles since 2009. This will let us look at the more up-to-date picture that may include OA publishers.
+It's interesting to see how openness looks when broken down by publisher. To do this, we'll subset the years more tightly and just look at articles since 2009. This will let us look at the more up-to-date picture that may include OA publishers.
 
 ``` r
 articles_recent = articles_all %>% filter(is_modern, year >= 2009)
@@ -159,9 +159,7 @@ From this we can see that Elsevier is massively outpublishing anyone else. Becau
 \# Repositories
 ===============
 
-A different question is to dig into which repositories are contributing to making papers available. We know that PubMed Central and the ArXiv are both very popular repositories, so we will plot them seperately. We'll combine all other repositories, including the thousands of institutional repositories, into a single category for now. As a reminder, we are only looking here at articles that are *only* available from a green repository.
-
-We can see in the graphs at
+A different question is to dig into which repositories are contributing to making papers available. Let's take a look at PubMed Central in particular, since it has become the most important single source of Green OA. We'll lump all the other repositories (about 5000 of them) in a separate category and plot the results.  As a reminder, we are only looking here at articles that are *only* available from a green repository:
 
 ``` r
 articles_all = articles_all %>% mutate(base_collection_string=as.character(green_base_collections))
@@ -182,7 +180,7 @@ articles_all %>% filter(is_modern) %>% filter(!is.na(repo)) %>% ggplot(aes(x=yea
 
 ![](oa_analysis_files/figure-markdown_github/unnamed-chunk-8-1.png)
 
-Again, it apprears that multi-year embargoes maybe affecting PMC. Regardless of this, PMC remains by far the most significant green repository, and a very important source of fulltext that would be otherwise unavailable.
+It apprears that multi-year embargoes maybe affecting PMC, since the number of articles shows a surprising drop in the last few years. However despite this, we see that PMC remains by far the most significant green repository, particularly for papers published in the last decade.
 
 ``` r
 articles_all %>% filter(year > 2009, oa=="green_only") %>% count(repo) %>% mutate(proportion=n/sum(n))
