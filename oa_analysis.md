@@ -31,10 +31,11 @@ articles_all %>% count(oa) %>% mutate(proportion=n/sum(n))
 Category definitions:
 
 -   *closed*: We could not find a free fulltext copy.
--   *free*: There is a free-to-read copy on the publisher page, but no license is given and the journal is not in DOAJ.
--   *green\_only*: The article is Green OA. There is a fulltext copy of the article in one or more open repositories, but not on the publisher page.
--   *gold\_doaj* The article is Gold OA. There is a copy on the publisher page, and the journal is listed in the DOAJ.
--   *gold\_not\_doaj*: The article is Gold OA. There is a copy on the publisher page, under a Creative Commons license.
+-   *gold\_free*: Free-to-read on the publisher page, with no license we could find.
+-   *gold\_hybrid*: Free-to-read on the publisher page, published under some kind of open license.
+-   *gold\_doaj* Free-to-read on the publisher page, and listed as open according to the DOAJ.
+-   *green\_only*: The article is Green OA. We couldn't find any free copy on the publisher page, but we did find one in a repository. Note: this category is for copies that are *only* available in the repository, nowhere else. 
+-   *NA*: Processing error of som kind...we'll fix these before publication
 
 So, about 23% of the DOI-assigned literature is available to read. Given that we’re sampling from 65,838,767 total journal articles with a Crossref DOI, that means we can estimate there are *at least* 65838767 \* 0.232 = 15274594 free-to-read articles (15.2 million).
 
