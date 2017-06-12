@@ -34,7 +34,7 @@ Category definitions:
 -   *gold\_free*: Free-to-read on the publisher page, with no license we could find.
 -   *gold\_hybrid*: Free-to-read on the publisher page, published under some kind of open license.
 -   *gold\_doaj* Free-to-read on the publisher page, and listed as open according to the DOAJ.
--   *green\_only*: The article is Green OA. We couldn't find any free copy on the publisher page, but we did find one in a repository. Note: this category is for copies that are *only* available in the repository, nowhere else. 
+-   *green\_only*: The article is Green OA. We couldn't find any free copy on the publisher page, but we did find one in a repository. Note: this category is for copies that are *only* available in the repository, nowhere else.
 -   *NA*: Processing error of som kind...we'll fix these before publication
 
 So, about 23% of the DOI-assigned literature is available to read. Given that we’re sampling from 65,838,767 total journal articles with a Crossref DOI, that means we can estimate there are *at least* 65838767 \* 0.232 = 15274594 free-to-read articles (15.2 million) with Crossref DOIs.
@@ -159,7 +159,9 @@ From this we can see that Elsevier is massively outpublishing anyone else. Becau
 \# Repositories
 ===============
 
-A different question is to dig into which repositories are contributing to making papers available. Let's take a look at PubMed Central in particular, since it has become the most important single source of Green OA. We'll lump all the other repositories (about 5000 of them) in a separate category and plot the results.  As a reminder, we are only looking here at articles that are *only* available from a green repository:
++A different question is to dig into which repositories are contributing to making papers available. Let's take a look at PubMed Central in particular, since it has become the most important single source of Green OA. We'll lump all the other repositories (about 5000 of them) in a separate category and plot the results. As a reminder, we are only looking here at articles that are *only* available from a green repository:
+
+We can see in the graphs at
 
 ``` r
 articles_all = articles_all %>% mutate(base_collection_string=as.character(green_base_collections))
