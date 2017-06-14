@@ -339,14 +339,6 @@ articles_accessed %>% ggplot(aes(x="", fill=oa)) + geom_bar() + oa_color_map
 articles_accessed = articles_accessed %>% mutate(is_modern = year >= 1990 & year <= 2017)
 articles_accessed %>% count(is_modern) %>% mutate(proportion = n / sum(n))
 
-articles_accessed %>% filter(is_modern) %>%
-    ggplot(aes(x=year, fill=oa)) + geom_bar(width=1) + oa_color_map
-
-oa_freq_by_year = articles_accessed %>% filter(is_modern) %>% count(year, oa) %>%
-  mutate(perc = n / sum(n)) %>%
-  ungroup()
-
-oa_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=oa)) + geom_area() + oa_color_map
 ```
 
 

@@ -290,23 +290,6 @@ articles_accessed %>% count(is_modern) %>% mutate(proportion = n / sum(n))
     ## 2      TRUE 100936  0.9554081
     ## 3        NA   1101  0.0104215
 
-``` r
-articles_accessed %>% filter(is_modern) %>%
-    ggplot(aes(x=year, fill=oa)) + geom_bar(width=1) + oa_color_map
-```
-
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-14-2.png)
-
-``` r
-oa_freq_by_year = articles_accessed %>% filter(is_modern) %>% count(year, oa) %>%
-  mutate(perc = n / sum(n)) %>%
-  ungroup()
-
-oa_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=oa)) + geom_area() + oa_color_map
-```
-
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-14-3.png)
-
 \# OA and citation patterns
 ===========================
 
