@@ -37,7 +37,7 @@ Category definitions:
 -   *green\_only*: The article is Green OA. We couldn't find any free copy on the publisher page, but we did find one in a repository. Note: this category is for copies that are *only* available in the repository, nowhere else.
 -   *NA*: Processing error of som kind...we'll fix these before publication
 
-So, about 23% of the DOI-assigned literature is available to read. Given that we’re sampling from 65,838,767 total journal articles with a Crossref DOI, that means we can estimate there are *at least* 65838767 \* 0.232 = 15274594 free-to-read articles (15.2 million) with Crossref DOIs.
+So, about 28% of the DOI-assigned literature is available to read. Given that we’re sampling from 66,560,153 total journal articles with a Crossref DOI, that means we can estimate there are *at least* 66560153 \* 0.279 = 18570283 free-to-read articles (18.6 million) with Crossref DOIs.
 
 But we know that in recent years OA has been gaining steam, so let's let's look more closely at OA over time.
 
@@ -168,14 +168,14 @@ articles_all = articles_all %>% mutate(base_collection_string=as.character(green
 
 articles_all$repo = NULL
 articles_all$repo[articles_all$oa=="green_only"] = "other"
-articles_all$repo[grepl('pmcid', articles_all$evidence)] = "PMC"
-articles_all$repo[grepl('pubmed', articles_all$base_collection_string)] = "PMC"
-articles_all$repo[grepl('arxiv', articles_all$base_collection_string)] = "arXiv"
+articles_all$repo[grepl('/pmc/', articles_all$best_open_url)] = "PMC"
+articles_all$repo[grepl('arxiv.org', articles_all$best_open_url)] = "arXiv"
+articles_all$repo[grepl('.edu', articles_all$best_open_url)] = ".edu"
 
-repo_ordered_levels = c("PMC", "arXiv", "other")
+repo_ordered_levels = c("PMC", "arXiv", ".edu", "other")
 articles_all = mutate(articles_all, repo=factor(repo, levels=repo_ordered_levels))
 
-repo_color_map = scale_fill_manual(values=c("purple", "blue", "dark blue"))
+repo_color_map = scale_fill_manual(values=c("purple", "blue", "dark blue", "black"))
 
 articles_all %>% filter(is_modern) %>% filter(!is.na(repo)) %>% ggplot(aes(x=year, fill=repo)) + geom_bar(width=1) + repo_color_map
 ```
@@ -188,11 +188,13 @@ It apprears that multi-year embargoes maybe affecting PMC, since the number of a
 articles_all %>% filter(year > 2009, oa=="green_only") %>% count(repo) %>% mutate(proportion=n/sum(n))
 ```
 
-    ## # A tibble: 2 × 3
+    ## # A tibble: 4 × 3
     ##     repo     n proportion
     ##   <fctr> <int>      <dbl>
-    ## 1    PMC   723  0.3763665
-    ## 2  other  1198  0.6236335
+    ## 1    PMC   757  0.3940656
+    ## 2  arXiv   373  0.1941697
+    ## 3   .edu   268  0.1395107
+    ## 4  other   523  0.2722540
 
 That said, smaller repositories are still making a significant contribution to Green OA, particularly in recent years. for articles published since 2009, the contribute about as much as PMC (42%).
 
@@ -249,27 +251,61 @@ DOIs accessed through Unpaywall on April 20, 2017. 50k accesses, 30k unique DOIs
 
 To write: - describe unpaywall - describe userbase of unpaywall - the number of calls to the api - percent of dois with more than one accesses - number of unique IP addresses - DOI based analysis - we'll include one or two of these graphs, not sure which yet - for the most viewed articles, the OA story is better, and getting even better
 
+NOTE THIS GOES UP TO 2017, SEEMS RELEVANT
+
 ``` r
-# articles_accessed_raw <- read.csv("export_study_dois_unpaywall_accesses_20170511.csv")
-# articles_accessed = articles_accessed_raw
-# articles_accessed = mutate(articles_accessed, oa=factor(oa_color_long, levels=oa_ordered_levels))
-# 
-# # how much oa
-# articles_accessed %>% count(oa) %>% mutate(proportion=n/sum(n))
-# articles_accessed %>% ggplot(aes(x="", fill=oa)) + geom_bar() + oa_color_map
-# 
-# articles_accessed = articles_accessed %>% mutate(is_modern = year >= 1990 & year <= 2015)
-# articles_accessed %>% count(is_modern) %>% mutate(proportion = n / sum(n))
-# 
-# articles_accessed %>% filter(is_modern) %>%
-#     ggplot(aes(x=year, fill=oa)) + geom_bar(width=1) + oa_color_map
-# 
-# oa_freq_by_year = articles_accessed %>% filter(is_modern) %>% count(year, oa) %>%
-#   mutate(perc = n / sum(n)) %>%
-#   ungroup()
-# 
-# oa_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=oa)) + geom_area() + oa_color_map
+articles_accessed_raw <- read.csv("export_study_dois_unpaywall_accesses.csv")
+articles_accessed = articles_accessed_raw
+articles_accessed = mutate(articles_accessed, oa=factor(oa_color_long, levels=oa_ordered_levels))
+
+# how much oa
+articles_accessed %>% count(oa) %>% mutate(proportion=n/sum(n))
 ```
+
+    ## # A tibble: 6 × 3
+    ##            oa     n   proportion
+    ##        <fctr> <int>        <dbl>
+    ## 1      closed 55944 0.5295370432
+    ## 2   gold_free 16136 0.1527350516
+    ## 3 gold_hybrid  8789 0.0831921399
+    ## 4   gold_doaj 15085 0.1427868278
+    ## 5  green_only  9661 0.0914460420
+    ## 6          NA    32 0.0003028955
+
+``` r
+articles_accessed %>% ggplot(aes(x="", fill=oa)) + geom_bar() + oa_color_map
+```
+
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-14-1.png)
+
+``` r
+articles_accessed = articles_accessed %>% mutate(is_modern = year >= 1990 & year <= 2017)
+articles_accessed %>% count(is_modern) %>% mutate(proportion = n / sum(n))
+```
+
+    ## # A tibble: 3 × 3
+    ##   is_modern      n proportion
+    ##       <lgl>  <int>      <dbl>
+    ## 1     FALSE   3610  0.0341704
+    ## 2      TRUE 100936  0.9554081
+    ## 3        NA   1101  0.0104215
+
+``` r
+articles_accessed %>% filter(is_modern) %>%
+    ggplot(aes(x=year, fill=oa)) + geom_bar(width=1) + oa_color_map
+```
+
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-14-2.png)
+
+``` r
+oa_freq_by_year = articles_accessed %>% filter(is_modern) %>% count(year, oa) %>%
+  mutate(perc = n / sum(n)) %>%
+  ungroup()
+
+oa_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=oa)) + geom_area() + oa_color_map
+```
+
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-14-3.png)
 
 \# OA and citation patterns
 ===========================
