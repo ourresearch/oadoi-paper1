@@ -6,11 +6,6 @@ many
 
 Results outline so far: - How accurate is our OA detection (from Juan, modified to use hybrid analysis) - How much OA is there? - How is open access changing over time? - How do OA patterns vary across publishers? - Which repositories contribute most to OA availability? - How do OA patterns vary by discipline? - How much OA is there in most highly-accessed papers? - Do different types of OA have different citation patterns?
 
-\# How accurate is our OA detection
-===================================
-
-put juan's stuff here.
-
 \# How much OA is there?
 ========================
 
@@ -28,6 +23,19 @@ articles_all %>% count(oa) %>% mutate(proportion=n/sum(n))
     ## 5  green_only  4816 0.0482347639
     ## 6          NA    29 0.0002904502
 
+``` r
+kable(articles_all %>% count(oa) %>% mutate(percent=round(100*n/sum(n),1)))
+```
+
+| oa           |      n|  percent|
+|:-------------|------:|--------:|
+| closed       |  72029|     72.1|
+| gold\_free   |  16202|     16.2|
+| gold\_hybrid |   3586|      3.6|
+| gold\_doaj   |   3183|      3.2|
+| green\_only  |   4816|      4.8|
+| NA           |     29|      0.0|
+
 Category definitions:
 
 -   *closed*: We could not find a free fulltext copy.
@@ -37,7 +45,7 @@ Category definitions:
 -   *green\_only*: The article is Green OA. We couldn't find any free copy on the publisher page, but we did find one in a repository. Note: this category is for copies that are *only* available in the repository, nowhere else.
 -   *NA*: Processing error of som kind...we'll fix these before publication
 
-So, about 28% of the DOI-assigned literature is available to read. Given that we’re sampling from 66,560,153 total journal articles with a Crossref DOI, that means we can estimate there are *at least* 66560153 \* 0.279 = 18570283 free-to-read articles (18.6 million) with Crossref DOIs.
+So, about 28% of the DOI-assigned literature is available to read. Given that there are 66,560,153 total journal articles with a Crossref DOI (from <http://api.crossref.org/works?filter=type:journal-article>), that means we can estimate there are *at least* 66560153 \* 0.279 = 18570283 free-to-read articles (18.6 million) with Crossref DOIs.
 
 But we know that in recent years OA has been gaining steam, so let's let's look more closely at OA over time.
 
@@ -57,32 +65,34 @@ articles_all %>% group_by(year <= 2017 & year >= 1500) %>% summarise(n())
     ## 2                          TRUE 99411
     ## 3                            NA   430
 
-It seems the year data is pretty good, with less than 0.1% missing or obviously wrong years. We don't really want to look at data since 1500, so let's see what's a reasonable window to examine. We'll try 1990 because it's comfortably before the "modern era" of open access.
+It seems the year data is pretty good, with less than 0.1% missing or obviously wrong years. We don't really want to look at data since 1500, so let's see what's a reasonable window to examine. We'll try 1950 because it's well before the "modern era" of open access.
 
 ``` r
 # subset by time
-articles_all = articles_all %>% mutate(is_modern = year >= 1990 & year <= 2017)
-articles_all %>% filter(is_modern) %>%
+articles_all %>% filter(year >= 1950 & year <= 2017) %>%
     ggplot(aes(x=year)) + geom_bar(width=1) 
 ```
 
 ![](oa_analysis_files/figure-markdown_github/unnamed-chunk-3-1.png)
 
-Unsurprisingly, we do not yet have enough data from 2017 to plot. More surprisingly, 2016 seems to be missing some data as well. Publishers can be slow to deposit information with Crossref, and this is likely the cause. So, we'll remove 2017 and 2016 from our timeseries subset.
+The DOI sample was taken in early 2017, so unsurprisingly, we do not yet have enough DOIs from 2017 to plot. More surprisingly, 2016 seems to be underrepresented as well. Publishers can be slow to deposit information with Crossref, and this is likely the cause. So, we'll remove 2017 and 2016 from our timeseries subset.
+
+Here's the version from 1950-2015:
 
 ``` r
-articles_all = articles_all %>% mutate(is_modern = year >= 1990 & year <= 2015)
+articles_all = articles_all %>% mutate(is_modern = year >= 1950 & year <= 2015)
+
 articles_all %>% count(is_modern) %>% mutate(proportion = n / sum(n))
 ```
 
     ## # A tibble: 3 × 3
     ##   is_modern     n  proportion
     ##       <lgl> <int>       <dbl>
-    ## 1     FALSE 34559 0.346126496
-    ## 2      TRUE 64856 0.649566829
+    ## 1     FALSE 10691 0.107075968
+    ## 2      TRUE 88724 0.888617357
     ## 3        NA   430 0.004306675
 
-This subset will still cover nearly two thirds of all DOIs ever, while letting us zoom in on the years of interest.
+This modern subset will 89% of all DOIs ever, while letting us zoom in on the years of interest.
 
 We'll start with plotting absolute numbers of OA articles:
 
@@ -120,22 +130,19 @@ articles_recent$publisher = fct_infreq(articles_recent$publisher)
 publishers = articles_recent %>% count(publisher) %>%
   ungroup()
 
-# the top 25 publishers publish 80% of articles.
-# top 100 publshers publish 87% of articles.
-sum(publishers$n[0:100]) /sum(publishers$n)
+# the top 20 publishers publish 82% of articles.
+sum(publishers$n[0:82]) /sum(publishers$n)
 ```
 
-    ## [1] 0.8346847
+    ## [1] 0.8194016
 
 ``` r
-#publishers %>% slice(1:25) %>% ggplot(aes(x=publisher, y=n)) + geom_bar(stat="identity") + coord_flip()
-
 publishers_oa = articles_recent %>% 
   count(publisher, oa) %>%
   ungroup()
 
 
-publishers_oa %>% slice(1:80) %>% mutate(publisher_rev=fct_rev(publisher)) %>% ggplot(aes(x=publisher_rev, y=n, fill=oa)) + 
+publishers_oa %>% slice(1:82) %>% mutate(publisher_rev=fct_rev(publisher)) %>% ggplot(aes(x=publisher_rev, y=n, fill=oa)) + 
   geom_bar(stat="identity") + 
   coord_flip() +
   oa_color_map
@@ -146,7 +153,7 @@ publishers_oa %>% slice(1:80) %>% mutate(publisher_rev=fct_rev(publisher)) %>% g
 ``` r
 #same thing but by % oa
 
-publishers_oa %>% slice(1:80) %>% mutate(publisher_rev=fct_rev(publisher)) %>% ggplot(aes(x=publisher_rev, y=n, fill=oa)) + 
+publishers_oa %>% slice(1:82) %>% mutate(publisher_rev=fct_rev(publisher)) %>% ggplot(aes(x=publisher_rev, y=n, fill=oa)) + 
   geom_bar(stat="identity", position="fill") + 
   coord_flip() +
   oa_color_map
@@ -175,9 +182,7 @@ articles_all$repo[grepl('.edu', articles_all$best_open_url)] = ".edu"
 repo_ordered_levels = c("PMC", "arXiv", ".edu", "other")
 articles_all = mutate(articles_all, repo=factor(repo, levels=repo_ordered_levels))
 
-repo_color_map = scale_fill_manual(values=c("purple", "blue", "dark blue", "black"))
-
-articles_all %>% filter(is_modern) %>% filter(!is.na(repo)) %>% ggplot(aes(x=year, fill=repo)) + geom_bar(width=1) + repo_color_map
+articles_all %>% filter(is_modern) %>% filter(!is.na(repo)) %>% ggplot(aes(x=year, fill=repo)) + geom_bar(width=1) + scale_fill_brewer(palette="Set3")
 ```
 
 ![](oa_analysis_files/figure-markdown_github/unnamed-chunk-8-1.png)
@@ -185,16 +190,27 @@ articles_all %>% filter(is_modern) %>% filter(!is.na(repo)) %>% ggplot(aes(x=yea
 It apprears that multi-year embargoes maybe affecting PMC, since the number of articles shows a surprising drop in the last few years. However despite this, we see that PMC remains by far the most significant green repository, particularly for papers published in the last decade.
 
 ``` r
-articles_all %>% filter(year > 2009, oa=="green_only") %>% count(repo) %>% mutate(proportion=n/sum(n))
+articles_all %>% filter(is_modern, oa=="green_only") %>% count(repo) %>% mutate(proportion=n/sum(n))
 ```
 
     ## # A tibble: 4 × 3
     ##     repo     n proportion
     ##   <fctr> <int>      <dbl>
-    ## 1    PMC   757  0.3940656
-    ## 2  arXiv   373  0.1941697
-    ## 3   .edu   268  0.1395107
-    ## 4  other   523  0.2722540
+    ## 1    PMC  1315  0.3103611
+    ## 2  arXiv   651  0.1536464
+    ## 3   .edu  1161  0.2740146
+    ## 4  other  1110  0.2619778
+
+``` r
+kable(articles_all %>% filter(is_modern, oa=="green_only") %>% count(repo) %>% mutate(percent=round(100*n/sum(n),1)))
+```
+
+| repo  |     n|  percent|
+|:------|-----:|--------:|
+| PMC   |  1315|     31.0|
+| arXiv |   651|     15.4|
+| .edu  |  1161|     27.4|
+| other |  1110|     26.2|
 
 That said, smaller repositories are still making a significant contribution to Green OA, particularly in recent years. for articles published since 2009, the contribute about as much as PMC (42%).
 
@@ -226,69 +242,45 @@ found_green_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=found_green)) + geo
 What are the most common licenses for open-access papers?
 
 ``` r
-articles_all %>% filter(is_modern) %>% filter(grepl('cc', license)) %>% ggplot(aes(x=year, fill=license)) + geom_bar(width=1, position="fill") 
+articles_all %>% filter(year >= 2009 & year <= 2015) %>% filter(grepl('cc', license)) %>% ggplot(aes(x=year, fill=license)) + geom_bar(width=1, position="fill") + scale_fill_brewer(palette="Set3")
 ```
 
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-12-1.png) It looks like there has been steady growth in the number of articles licensed with the CC-BY license, largely at the expense of the CC-BY-NC license.
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-12-1.png)
 
-Let's also look at CC licenses by type of OA
-
-``` r
-# articles_all %>% filter(is_modern) %>% filter(oa != "closed", oa != "free") %>% ggplot(aes(x=oa,  fill=license)) + geom_bar(width=1, position="fill") 
-```
-
-Most repositories do not note the license of the work, so green\_only is surely an undercount. It's interesting to see that DOAJ journals are more likely to use the more permissive CC-BY license. This graph needs different colors, so that license=NA is shown as gray.
-
-\# By discipline
-================
-
-TBD
+It looks like there has been steady growth in the number of articles licensed with the CC-BY license, largely at the expense of the CC-BY-NC license.
 
 \# How much OA is there for most-accessed papers?
 =================================================
 
-DOIs accessed through Unpaywall on April 20, 2017. 50k accesses, 30k unique DOIs, 9k unique IP addresses. (we will fix the plots so the two types of gold are beside each other) This analysis is using the 30k DOIs.
-
-To write: - describe unpaywall - describe userbase of unpaywall - the number of calls to the api - percent of dois with more than one accesses - number of unique IP addresses - DOI based analysis - we'll include one or two of these graphs, not sure which yet - for the most viewed articles, the OA story is better, and getting even better
+DOIs accessed through Unpaywall during the week of XXX XX accesses, XXX unique DOIs, XXXX unique IP addresses. Selected random accesses until had 100k distinct DOIs
 
 NOTE THIS GOES UP TO 2017, SEEMS RELEVANT
 
 ``` r
 articles_accessed_raw <- read.csv("export_study_dois_unpaywall_accesses.csv")
-articles_accessed = articles_accessed_raw
+articles_accessed = articles_accessed_raw 
 articles_accessed = mutate(articles_accessed, oa=factor(oa_color_long, levels=oa_ordered_levels))
-
+articles_accessed = articles_accessed %>% filter(!is.na(oa))
 # how much oa
-articles_accessed %>% count(oa) %>% mutate(proportion=n/sum(n))
+kable(articles_accessed %>% count(oa) %>% mutate(percent=round(100*n/sum(n),1)))
 ```
 
-    ## # A tibble: 6 × 3
-    ##            oa     n   proportion
-    ##        <fctr> <int>        <dbl>
-    ## 1      closed 55944 0.5295370432
-    ## 2   gold_free 16136 0.1527350516
-    ## 3 gold_hybrid  8789 0.0831921399
-    ## 4   gold_doaj 15085 0.1427868278
-    ## 5  green_only  9661 0.0914460420
-    ## 6          NA    32 0.0003028955
+| oa           |      n|  percent|
+|:-------------|------:|--------:|
+| closed       |  55944|     53.0|
+| gold\_free   |  16136|     15.3|
+| gold\_hybrid |   8789|      8.3|
+| gold\_doaj   |  15085|     14.3|
+| green\_only  |   9661|      9.1|
 
 ``` r
-articles_accessed %>% ggplot(aes(x="", fill=oa)) + geom_bar() + oa_color_map
+articles_accessed %>% filter(!is.na(oa)) %>% ggplot(aes(x="", fill=oa)) + 
+  geom_bar(position="fill", width=0.2) + 
+  coord_flip() +
+  oa_color_map 
 ```
 
-![](oa_analysis_files/figure-markdown_github/unnamed-chunk-14-1.png)
-
-``` r
-articles_accessed = articles_accessed %>% mutate(is_modern = year >= 1990 & year <= 2017)
-articles_accessed %>% count(is_modern) %>% mutate(proportion = n / sum(n))
-```
-
-    ## # A tibble: 3 × 3
-    ##   is_modern      n proportion
-    ##       <lgl>  <int>      <dbl>
-    ## 1     FALSE   3610  0.0341704
-    ## 2      TRUE 100936  0.9554081
-    ## 3        NA   1101  0.0104215
+![](oa_analysis_files/figure-markdown_github/unnamed-chunk-13-1.png)
 
 \# OA and citation patterns
 ===========================
