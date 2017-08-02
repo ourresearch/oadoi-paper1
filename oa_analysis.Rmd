@@ -28,8 +28,8 @@ library(DescTools)
 
 # change font sizes
 theme_set(theme_light())
-this_theme = theme(text = element_text(size=18),
-                   axis.text.x = element_text(size=14),
+this_theme = theme(text = element_text(size=18), 
+                   axis.text.x = element_text(size=14), 
                    axis.text.y = element_text(size=14))
 
 ```
@@ -53,12 +53,12 @@ Results outline so far:
 # setwd("~/Dropbox/ti/oadoi-paper")
 
 #### uncomment this on first run of the day
-articles_raw <- read.csv("export_study_main_100k.csv")
+articles_raw <- read.csv("crossref_100k.csv")
 articles_all = articles_raw
 
 # modify the colors to handle hybrid
 articles_all = articles_all %>%
-  mutate(is_open_license=(grepl("cc", license) | oa_color=="gold"))
+  mutate(is_open_license=(grepl("cc", license) | oa_color_long=="gold"))
 
 # there is an artifact in the data caused by this "publisher." remove.
 articles_all = articles_all %>% filter(publisher != "CrossRef Test Account")
@@ -69,17 +69,19 @@ names(articles_all)
 # sort the factor for easier plotting
 
 
-oa_ordered_levels = c("closed", "gold_free", "gold_hybrid", "gold_doaj", "green_only")
+oa_ordered_levels = c("closed", "bronze", "hybrid", "gold", "green")
 articles_all = mutate(articles_all, oa=factor(oa, levels=oa_ordered_levels))
 
-articles_all = mutate(articles_all, oa=fct_recode(oa, "bronze"="gold_free", "hybrid"="gold_hybrid", "gold"="gold_doaj", "green"="green_only"))
+articles_all = mutate(articles_all, oa=fct_recode(oa, "bronze"="bronze", "hybrid"="hybrid", "gold"="gold", "green"="green"))
 
+articles_all %>% count(oa)
+                                                
 # handy for color-coding later
 oa_color_map = scale_fill_manual(values=c("#bbbbbb", "#cd7f32", "#ffa500", "#ffe135", "#4CAF50"))
-
-
-
 ```
+
+
+
 
 
 
@@ -104,8 +106,8 @@ n_2015_ci = BinomCI(n_2015, sum(n_2015),
         method = "clopper-pearson")
 100*round(n_2015_ci, 3)
 n_2015_multi = c(2608, 832, 445, 535, 298)
-100*round(MultinomCI(n_2015_multi,
-           conf.level=0.95,
+100*round(MultinomCI(n_2015_multi, 
+           conf.level=0.95, 
            method="sisonglaz"), 3)
 
 # binomial for open vs closed
@@ -116,8 +118,8 @@ unpaywall_ci = BinomCI(unpaywall_dois, sum(unpaywall_dois),
 100*round(unpaywall_ci, 3)
 # multinomial for the types of open
 unpaywall_dois_types = 100000 * c(15.3,8.3,14.3,9.1, 53)/100
-100*round(MultinomCI(unpaywall_dois_types,
-           conf.level=0.95,
+100*round(MultinomCI(unpaywall_dois_types, 
+           conf.level=0.95, 
            method="sisonglaz"), 3)
 
 ```
@@ -128,10 +130,10 @@ Category definitions:
 - *bronze*: Free-to-read on the publisher page, with no license we could find.
 - *hybrid*: Free-to-read on the publisher page, published under some kind of open license.
 - *gold* Free-to-read on the publisher page, and listed as open according to the DOAJ.
-- *green*: The article is Green OA. We couldn't find any free copy on the publisher page, but we did find one in a repository. Note: this category is for copies that are *only* available in the repository, nowhere else.
+- *green*: The article is Green OA. We couldn't find any free copy on the publisher page, but we did find one in a repository. Note: this category is for copies that are *only* available in the repository, nowhere else. 
 - *NA*: Processing error of some kind
 
-So, about 28% of the DOI-assigned literature is available to read. Given that there are 66,560,153 total journal articles with a Crossref DOI (from http://api.crossref.org/works?filter=type:journal-article), that means we can estimate there are *at least* 66560153 * 0.279 = 18570283 free-to-read articles (18.6 million) with Crossref DOIs.
+So, about 28% of the DOI-assigned literature is available to read. Given that there are 66,560,153 total journal articles with a Crossref DOI (from http://api.crossref.org/works?filter=type:journal-article), that means we can estimate there are *at least* 66560153 * 0.279 = 18570283 free-to-read articles (18.6 million) with Crossref DOIs.  
 
 But we know that in recent years OA has been gaining steam, so let's let's look more closely at OA over time.
 
@@ -152,12 +154,23 @@ articles_all %>% group_by(year <= 2017 & year >= 1500) %>% summarise(n())
 
 It seems the year data is pretty good, with less than 0.1% missing or obviously wrong years. We don't really want to look at data since 1500, so let's see what's a reasonable window to examine. We'll try 1950 because it's well before the "modern era" of open access.
 
+
+```{r}
+###############
+# HAP exploring
+# looking into bronze
+crossref_bronze_2016 = articles_all %>% filter(oa=="bronze", year==2016)
+write.csv(crossref_bronze_2016, file="crossref_bronze_2016.csv", row.names=TRUE)
+
+```
+
+
 ```{r}
 
 # subset by time
 articles_all %>% filter(year >= 1950 & year <= 2017) %>%
-    ggplot(aes(x=year)) + geom_bar(width=1) +
-    scale_x_continuous(name="publication year", limits=c(1950, 2017),
+    ggplot(aes(x=year)) + geom_bar(width=1) + 
+    scale_x_continuous(name="publication year", limits=c(1950, 2017), 
                        breaks = c(2017, seq(1950, 2015, by = 10))) +
     scale_y_continuous(name="count in sample") + this_theme
 
@@ -179,24 +192,24 @@ We'll start with plotting absolute numbers of OA articles:
 ```{r}
 
 population_scaling_factor =  66560153 / 100000  # population size divided by sample size
-oa_years = articles_all %>%
+oa_years = articles_all %>% 
     filter(is_modern) %>%
     count(year, oa) %>%
-    mutate(pop_millions = n * population_scaling_factor / 1000000)
+    mutate(pop_millions = n * population_scaling_factor / 1000000)  
 
-oa_years %>% ggplot(aes(x=year, fill=oa, y=pop_millions)) +
+oa_years %>% ggplot(aes(x=year, fill=oa, y=pop_millions)) + 
     geom_bar(stat="identity", width = 1) +
     scale_x_continuous(name="Publication year",  breaks = c(seq(1950, 2015, by = 10))) +
-    scale_y_continuous(name="Total articles (millions)") +
-    oa_color_map +
-    this_theme
+    scale_y_continuous(name="Total articles (millions)") +   
+    oa_color_map + 
+    this_theme    
 
 ```
 
 We can see the OA count is growing. How many articles published in 2015 (the last year we have complete data for) were OA?
 
 ```{r}
-oa_years %>% filter(year == 2015, oa != "closed") %>%
+oa_years %>% filter(year == 2015, oa != "closed") %>% 
     summarise(open_2015_millions = sum(pop_millions))
 
 ```
@@ -207,12 +220,12 @@ We can see the absolute number of free-to-read articles of all kinds is growing 
 ```{r}
 
 # see http://stackoverflow.com/questions/24576515/relative-frequencies-proportions-with-dplyr
-oa_freq_by_year = articles_all %>% filter(is_modern) %>% count(year, oa) %>%
-  mutate(perc = n / sum(n)) %>%
-  ungroup()
+oa_freq_by_year = articles_all %>% filter(is_modern) %>% count(year, oa) %>%  
+  mutate(perc = n / sum(n)) %>%  
+  ungroup()  
 
-oa_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=oa)) + geom_area() +
-    scale_x_continuous(name="Publication year", limits=c(1950, 2015),
+oa_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=oa)) + geom_area() + 
+    scale_x_continuous(name="Publication year", limits=c(1950, 2015), 
                        breaks = c(seq(1950, 2015, by = 10))) +
     scale_y_continuous(name="Percent of articles", labels=percent) +
     oa_color_map + this_theme
@@ -246,32 +259,32 @@ publishers = articles_recent %>% count(publisher) %>%
 # the top 20 publishers publish 82% of articles.
 sum(publishers$n[0:82]) /sum(publishers$n)
 
-publishers_oa = articles_recent %>%
+publishers_oa = articles_recent %>% 
     count(publisher, oa) %>%
     mutate(pop_n_millions = n * population_scaling_factor / 1000000) %>%
     ungroup()
 
-temp_theme = theme(text = element_text(size=18),
-                   axis.text.x = element_text(size=12),
+temp_theme = theme(text = element_text(size=18), 
+                   axis.text.x = element_text(size=12), 
                    axis.text.y = element_text(size=12))
 
 
-publishers_oa %>% slice(1:83) %>% mutate(publisher_rev=fct_rev(publisher)) %>%
-    ggplot(aes(x=publisher_rev, y=pop_n_millions, fill=oa)) +
-    geom_bar(stat="identity") +
+publishers_oa %>% slice(1:83) %>% mutate(publisher_rev=fct_rev(publisher)) %>% 
+    ggplot(aes(x=publisher_rev, y=pop_n_millions, fill=oa)) + 
+    geom_bar(stat="identity") + 
     coord_flip() +
     scale_x_discrete(name="publisher") +
     scale_y_continuous(name="Articles published (millions)") +
     oa_color_map + temp_theme
 
-#same thing but by percent oa instead of absolute numbers
-
-publishers_oa %>% slice(1:83) %>% mutate(publisher_rev=fct_rev(publisher)) %>% ggplot(aes(x=publisher_rev, y=n, fill=oa)) +
-  geom_bar(stat="identity", position="fill") +
+publishers_oa %>% slice(1:83) %>% mutate(publisher_rev=fct_rev(publisher)) %>% ggplot(aes(x=publisher_rev, y=n, fill=oa)) + 
+  geom_bar(stat="identity", position="fill") + 
   coord_flip() +
     scale_x_discrete(name="publisher") +
     scale_y_continuous(name="Percent of articles", labels=percent) +
   oa_color_map + temp_theme
+
+
 ```
 
 
@@ -285,24 +298,23 @@ From this we can see that Elsevier is massively outpublishing anyone else. Becau
 
 +A different question is to dig into which repositories are contributing to making papers available. Let's take a look at PubMed Central in particular, since it has become the most important single source of Green OA. We'll lump all the other repositories (about 5000 of them) in a separate category and plot the results.  As a reminder, we are only looking here at articles that are *only* available from a green repository:
 
-We can see in the graphs at
 ```{r}
-articles_all = articles_all %>% mutate(base_collection_string=as.character(green_base_collections))
-
-articles_all$repo = NULL
-articles_all$repo[articles_all$oa=="green"] = "other"
-articles_all$repo[grepl('/pmc/', articles_all$best_open_url)] = "PMC"
-articles_all$repo[grepl('arxiv.org', articles_all$best_open_url)] = "arXiv"
-articles_all$repo[grepl('.edu', articles_all$best_open_url)] = ".edu"
-
-repo_ordered_levels = c("PMC", "arXiv", ".edu", "other")
-articles_all = mutate(articles_all, repo=factor(repo, levels=repo_ordered_levels))
-
-articles_all %>% filter(is_modern) %>% filter(!is.na(repo)) %>% ggplot(aes(x=year, fill=repo)) +
-    geom_bar(width=1) + scale_fill_brewer(palette="Set3") +
-    scale_x_continuous(name="publication year", limits=c(1950, 2015),
-                       breaks = c(seq(1950, 2015, by = 10))) +
-    scale_y_continuous(name="count in sample") + this_theme
+    # articles_all = articles_all %>% mutate(base_collection_string=as.character(green_base_collections))
+    # 
+    # articles_all$repo = NULL
+    # articles_all$repo[articles_all$oa=="green"] = "other"
+    # articles_all$repo[grepl('/pmc/', articles_all$best_open_url)] = "PMC"
+    # articles_all$repo[grepl('arxiv.org', articles_all$best_open_url)] = "arXiv"
+    # articles_all$repo[grepl('.edu', articles_all$best_open_url)] = ".edu"
+    # 
+    # repo_ordered_levels = c("PMC", "arXiv", ".edu", "other")
+    # articles_all = mutate(articles_all, repo=factor(repo, levels=repo_ordered_levels))
+    # 
+    # articles_all %>% filter(is_modern) %>% filter(!is.na(repo)) %>% ggplot(aes(x=year, fill=repo)) +
+    #     geom_bar(width=1) + scale_fill_brewer(palette="Set3") + 
+    #     scale_x_continuous(name="publication year", limits=c(1950, 2015), 
+    #                        breaks = c(seq(1950, 2015, by = 10))) +
+    #     scale_y_continuous(name="count in sample") + this_theme
 
 
 ```
@@ -310,8 +322,8 @@ articles_all %>% filter(is_modern) %>% filter(!is.na(repo)) %>% ggplot(aes(x=yea
 It apprears that multi-year embargoes maybe affecting PMC, since the number of articles shows a surprising drop in the last few years. However despite this, we see that PMC remains by far the most significant green repository, particularly for papers published in the last decade.
 
 ```{r}
-articles_all %>% filter(is_modern, oa=="green") %>% count(repo) %>% mutate(proportion=n/sum(n))
-kable(articles_all %>% filter(is_modern, oa=="green") %>% count(repo) %>% mutate(percent=round(100*n/sum(n),1)))
+# articles_all %>% filter(is_modern, oa=="green") %>% count(repo) %>% mutate(proportion=n/sum(n))
+# kable(articles_all %>% filter(is_modern, oa=="green") %>% count(repo) %>% mutate(percent=round(100*n/sum(n),1)))
 
 ```
 
@@ -323,13 +335,13 @@ That said, smaller repositories are still making a significant contribution to G
 We are only counting something as "green" if it's not available in any other format (Gold, hybrid). However, it's also interesting to look at how many articles are available in a repository, regardless of where else they might be open. Let's take a look at that below:
 
 ```{r}
-gray_green_color_map = scale_fill_manual(values=c("#777777", "#008000", "#FFD700"),
-                                         name="",
+gray_green_color_map = scale_fill_manual(values=c("#777777", "#008000", "#FFD700"), 
+                                         name="", 
                                          labels=c("not in a repository", "in a repository"))
 
 articles_all %>% filter(is_modern) %>% ggplot(aes(x=year, fill=found_green)) + geom_bar(width=1) +
-    gray_green_color_map +
-    scale_x_continuous(name="publication year", limits=c(1950, 2015),
+    gray_green_color_map + 
+    scale_x_continuous(name="publication year", limits=c(1950, 2015), 
                        breaks = c(seq(1950, 2015, by = 10))) +
     scale_y_continuous(name="count in sample") + this_theme
 ```
@@ -340,11 +352,11 @@ found_green_freq_by_year = articles_all %>% filter(is_modern) %>% count(year, fo
   mutate(perc = n / sum(n)) %>%
   ungroup()
 found_green_freq_by_year %>% ggplot(aes(x=year, y=perc, fill=found_green)) + geom_area() +
-    gray_green_color_map +
-    scale_x_continuous(name="publication year", limits=c(1950, 2015),
+    gray_green_color_map + 
+    scale_x_continuous(name="publication year", limits=c(1950, 2015), 
                        breaks = c(seq(1950, 2015, by = 10))) +
     scale_y_continuous(name="percent in sample", labels=percent) + this_theme
-
+    
 ```
 
 
@@ -363,7 +375,7 @@ articles_all %>% filter(year >= 2009 & year <= 2015) %>% filter(license != "") %
 
 # now limit to just Creative Commons licenses
 articles_all %>% filter(year >= 2009 & year <= 2015) %>% filter(grepl('cc', license)) %>% ggplot(aes(x=year, fill=license)) + geom_bar(width=1, position="fill") +
-    scale_fill_brewer(palette="Set3") +
+    scale_fill_brewer(palette="Set3") + 
     scale_x_continuous(name="publication year") +
     scale_y_continuous(name="papers with licenses", labels=percent) + this_theme
 
@@ -383,22 +395,32 @@ Selected random accesses until had 100k distinct DOIs
 NOTE THIS GOES UP TO 2017, SEEMS RELEVANT
 
 ```{r}
-articles_accessed_raw <- read.csv("export_study_dois_unpaywall_accesses.csv")
-articles_accessed = articles_accessed_raw
+articles_accessed_raw <- read.csv("unpaywall_100k.csv")
+articles_accessed = articles_accessed_raw 
 articles_accessed = mutate(articles_accessed, oa=factor(oa_color_long, levels=oa_ordered_levels))
-articles_accessed = mutate(articles_accessed, oa=fct_recode(oa, "bronze"="gold_free", "hybrid"="gold_hybrid", "gold"="gold_doaj", "green"="green_only"))
+articles_accessed = mutate(articles_accessed, oa=fct_recode(oa, "bronze"="bronze", "hybrid"="hybrid", "gold"="gold", "green"="green"))
 articles_accessed = articles_accessed %>% filter(!is.na(oa))
 # how much oa
 kable(articles_accessed %>% count(oa) %>% mutate(percent=round(100*n/sum(n),1)))
 
-articles_accessed %>% filter(!is.na(oa)) %>% ggplot(aes(x="", fill=oa)) +
-  geom_bar(position="fill", width=0.2) +
+#unpaywall sample
+articles_accessed %>% filter(!is.na(oa)) %>% ggplot(aes(x="", fill=oa)) + 
+  geom_bar(position="fill", width=0.2) + 
   coord_flip() +
-  oa_color_map +
-    scale_y_continuous(name="percent of sample", labels=percent) + this_theme
+  oa_color_map + 
+    scale_y_continuous(name="percent of articles", labels=percent) + this_theme
+
+# whole sample
+articles_all %>% filter(!is.na(oa)) %>% filter(year<=2015) %>% ggplot(aes(name="", x="", fill=oa)) + 
+  geom_bar(position="fill", width=0.2) + 
+  coord_flip() +
+  oa_color_map + 
+    scale_y_continuous(name="percent of articles", labels=percent) + this_theme
+
 
 # number of articles in last two years in Unpaywall sample
 articles_accessed %>% group_by(year <= 2017 & year >= 2015) %>% summarise(n())
+
 
 ```
 
@@ -414,14 +436,14 @@ unpaywall_ci = BinomCI(unpaywall_dois, sum(unpaywall_dois),
 100*round(unpaywall_ci, 3)
 # multinomial for the types of open
 unpaywall_dois_types = 100000 * c(15.3,8.3,14.3,9.1, 53)/100
-100*round(MultinomCI(unpaywall_dois_types,
-           conf.level=0.95,
+100*round(MultinomCI(unpaywall_dois_types, 
+           conf.level=0.95, 
            method="sisonglaz"), 3)
 ```
 
 crossref sample
 ```{r}
-crossref sample
+# crossref sample
 # binomial for open vs closed
 crossref_dois = 100000 * c(27.9,72)/100
 crossref_ci = BinomCI(crossref_dois, sum(crossref_dois),
@@ -432,8 +454,8 @@ crossref_ci = BinomCI(crossref_dois, sum(crossref_dois),
 crossref_ci[1,] * 66560153
 # multinomial for the types of open
 crossref_dois_types = 100000 * c(16.2,3.6,3.2,4.8,72)/100
-100*round(MultinomCI(crossref_dois_types,
-           conf.level=0.95,
+100*round(MultinomCI(crossref_dois_types, 
+           conf.level=0.95, 
            method="sisonglaz"), 3)
 ```
 
@@ -447,8 +469,8 @@ wos_dois_ci = BinomCI(wos_dois, sum(wos_dois),
 100*round(wos_dois_ci, 3)
 # multinomial for the types of open
 wos_dois_types = 100000 * c(12.9,4.3,7.4,11.5,63.9)/100
-100*round(MultinomCI(wos_dois_types,
-           conf.level=0.95,
+100*round(MultinomCI(wos_dois_types, 
+           conf.level=0.95, 
            method="sisonglaz"), 3)
 
 ```
